@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ClearInspect · Checagem de carro usado</title>
+<meta name="description" content="Checklist interativo para conferir se o carro que você comprou está em ordem: anúncio, lataria, mecânica, documentação e teste de rodagem.">
+<meta name="theme-color" content="#0a0c11">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- Navegação -->
+<header class="nav">
+  <div class="nav-in">
+    <a class="logo" href="#topo" aria-label="ClearInspect, início">
+      <span class="logo-mark"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 6v6c0 4.5 3.4 8.3 8 9 4.6-.7 8-4.5 8-9V6z"/><path d="m8.5 12 2.5 2.5 4.5-5"/></svg></span>
+      <span>Clear<b>Inspect</b></span>
+    </a>
+    <nav class="links" aria-label="Principal">
+      <a href="#como-funciona">Como funciona</a>
+      <a href="#checklist">Checklist</a>
+      <a href="#consultas">Consultas</a>
+      <a href="#faq">Dúvidas</a>
+    </nav>
+    <a class="btn-cta sm" href="#checklist">Iniciar checagem</a>
+  </div>
+</header>
+
+<!-- Hero com busca e modelo 3D -->
+<section class="hero" id="topo">
+  <div class="hero-in">
+    <div class="hero-copy">
+      <span class="eyebrow"><span class="dot"></span>Checagem gratuita e guiada</span>
+      <h1>Comprou um carro?<br><span class="hl">Confira se está tudo em ordem.</span></h1>
+      <p class="lead">Um checklist guiado com 15 pontos de verificação, de documentos a mecânica, para você não ser pego de surpresa depois da compra.</p>
+
+      <div class="search-wrap">
+        <label class="search">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7.5"/><path d="m20.5 20.5-4-4"/></svg>
+          <input id="q" type="text" placeholder="Modelo do carro (ex: Honda Civic 2018)" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="sug" aria-autocomplete="list">
+        </label>
+        <ul class="sug" id="sug" role="listbox" hidden></ul>
+      </div>
+
+      <form class="plate-form" id="plateForm" novalidate>
+        <div class="plate" aria-hidden="false">
+          <span class="plate-top"><span>BRASIL</span><i class="flag"></i></span>
+          <input id="plate" type="text" inputmode="text" maxlength="8" placeholder="ABC1D23" aria-label="Placa do veículo" autocomplete="off" spellcheck="false">
+        </div>
+        <button class="btn-cta" type="submit">Adicionar placa
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </button>
+      </form>
+      <p class="plate-msg" id="plateMsg" aria-live="polite">A placa entra no seu relatório em PDF. Aceita os formatos Mercosul e antigo.</p>
+
+      <ul class="stats">
+        <li><b>15</b><span>pontos de checagem</span></li>
+        <li><b>5</b><span>etapas guiadas</span></li>
+        <li><b>100%</b><span>gratuito</span></li>
+      </ul>
+    </div>
+
+    <div class="viewer-card">
+      <div class="viewer" id="viewer">
+        <div class="viewer-loading" aria-hidden="true"><span class="spin"></span>Carregando modelo 3D…</div>
+        <div class="no3d-msg">
+          <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 16v3M19 16v3M4 16h16v-5l-2-5H6l-2 5z"/><path d="M4 11h16M7.5 13.5h.01M16.5 13.5h.01"/></svg>
+          <p>Não foi possível carregar o modelo 3D neste navegador.<br>O checklist continua funcionando normalmente.</p>
+        </div>
+        <div class="hotspots" id="hotspots"></div>
+        <span class="drag-hint"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/></svg>Arraste para girar · clique nos pontos</span>
+      </div>
+      <div class="viewer-bar">
+        <div class="seg" id="types" role="radiogroup" aria-label="Tipo de carroceria">
+          <button type="button" role="radio" data-type="hatch">Hatch</button>
+          <button type="button" role="radio" data-type="sedan">Sedã</button>
+          <button type="button" role="radio" data-type="suv">SUV</button>
+          <button type="button" role="radio" data-type="picape">Picape</button>
+        </div>
+        <div class="swatches" id="colors" role="radiogroup" aria-label="Cor do carro">
+          <button type="button" role="radio" data-color="#e8ebf0" style="--c:#e8ebf0" aria-label="Branco"></button>
+          <button type="button" role="radio" data-color="#9aa3ad" style="--c:#9aa3ad" aria-label="Prata"></button>
+          <button type="button" role="radio" data-color="#1b1e24" style="--c:#1b1e24" aria-label="Preto"></button>
+          <button type="button" role="radio" data-color="#c4262e" style="--c:#c4262e" aria-label="Vermelho"></button>
+          <button type="button" role="radio" data-color="#2c449f" style="--c:#2c449f" aria-label="Azul"></button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Como funciona -->
+<section class="section" id="como-funciona">
+  <div class="sec-in">
+    <header class="sec-head reveal">
+      <span class="kicker">Como funciona</span>
+      <h2>Três passos para comprar com segurança</h2>
+    </header>
+    <ol class="steps">
+      <li class="step reveal">
+        <span class="step-n">01</span>
+        <h3>Identifique o veículo</h3>
+        <p>Busque o modelo e informe a placa. O carro em 3D se adapta ao tipo de carroceria escolhido.</p>
+      </li>
+      <li class="step reveal">
+        <span class="step-n">02</span>
+        <h3>Siga o checklist</h3>
+        <p>São 5 etapas com dicas práticas. Marque cada item conforme for conferindo; o progresso fica salvo no navegador.</p>
+      </li>
+      <li class="step reveal">
+        <span class="step-n">03</span>
+        <h3>Gere o relatório</h3>
+        <p>Baixe um PDF com tudo o que foi verificado para negociar com o vendedor ou guardar junto com os documentos.</p>
+      </li>
+    </ol>
+  </div>
+</section>
+
+<!-- Checklist -->
+<section class="section alt" id="checklist">
+  <div class="sec-in">
+    <header class="sec-head reveal">
+      <span class="kicker">Checklist</span>
+      <h2>Inspeção completa do veículo</h2>
+    </header>
+
+    <div class="check-grid">
+      <aside class="summary" aria-label="Resumo da checagem">
+        <div class="ring-box">
+          <svg class="ring" viewBox="0 0 120 120" aria-hidden="true">
+            <circle cx="60" cy="60" r="52" class="ring-bg"/>
+            <circle cx="60" cy="60" r="52" class="ring-fg" id="ring"/>
+          </svg>
+          <div class="ring-txt"><b id="ringPct">0%</b><span>avaliado</span></div>
+        </div>
+        <dl class="vehicle">
+          <div><dt>Modelo</dt><dd id="vModel">Não informado</dd></div>
+          <div><dt>Placa</dt><dd id="vPlate">Não informada</dd></div>
+        </dl>
+        <ul class="cat-list" id="catList"></ul>
+        <button class="link-btn" id="reset" type="button">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
+          Recomeçar checagem
+        </button>
+      </aside>
+
+      <div class="check-main">
+        <nav class="tabs" id="tabs" aria-label="Categorias"></nav>
+        <div class="head"><h3 id="title"></h3><span class="pill" id="pill"></span></div>
+        <section id="list"></section>
+        <div class="nav-steps">
+          <button class="btn ghost" id="prev" type="button">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>Etapa anterior
+          </button>
+          <button class="btn ghost" id="next" type="button">Próxima etapa
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Consultas recomendadas -->
+<section class="section" id="consultas">
+  <div class="sec-in">
+    <header class="sec-head reveal">
+      <span class="kicker">Consultas</span>
+      <h2>O que pesquisar antes de fechar negócio</h2>
+      <p>Além da inspeção física, confira o histórico do veículo pela placa ou pelo chassi.</p>
+    </header>
+    <div class="feat-grid">
+      <article class="feat reveal">
+        <span class="feat-ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m14 13-7.5 7.5a2.1 2.1 0 0 1-3-3L11 10"/><path d="m16 16 6-6M8 8l6-6M9 7l8 8M21 11l-8-8"/></svg></span>
+        <h3>Leilão</h3>
+        <p>Carros de leilão costumam valer menos e podem ter restrições de seguro.</p>
+      </article>
+      <article class="feat reveal">
+        <span class="feat-ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2 20h20z"/><path d="M12 10v4M12 17h.01"/></svg></span>
+        <h3>Sinistro</h3>
+        <p>Indica se o veículo já teve perda total ou colisão grave registrada por seguradora.</p>
+      </article>
+      <article class="feat reveal">
+        <span class="feat-ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></span>
+        <h3>Roubo e furto</h3>
+        <p>Confirme que não há registro de roubo ou furto ativo para a placa e o chassi.</p>
+      </article>
+      <article class="feat reveal">
+        <span class="feat-ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18M7 15h3"/></svg></span>
+        <h3>Débitos e multas</h3>
+        <p>IPVA, licenciamento e multas pendentes passam para o novo dono.</p>
+      </article>
+      <article class="feat reveal">
+        <span class="feat-ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.4-.6-.6-2.4z"/></svg></span>
+        <h3>Recall</h3>
+        <p>Veja se há chamados de recall em aberto e se foram atendidos pelo dono anterior.</p>
+      </article>
+      <article class="feat reveal">
+        <span class="feat-ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg></span>
+        <h3>Gravame</h3>
+        <p>Mostra se o carro ainda está alienado a um banco por financiamento.</p>
+      </article>
+    </div>
+    <div class="sources reveal">
+      <p>Onde consultar gratuitamente:</p>
+      <a href="https://portalservicos.senatran.serpro.gov.br/" target="_blank" rel="noopener">Portal de Serviços Senatran</a>
+      <a href="https://veiculos.fipe.org.br/" target="_blank" rel="noopener">Tabela FIPE</a>
+      <span>Detran do seu estado</span>
+    </div>
+  </div>
+</section>
+
+<!-- Dúvidas frequentes -->
+<section class="section alt" id="faq">
+  <div class="sec-in narrow">
+    <header class="sec-head reveal">
+      <span class="kicker">Dúvidas</span>
+      <h2>Perguntas frequentes</h2>
+    </header>
+    <div class="faq">
+      <details class="reveal">
+        <summary>Preciso entender de mecânica para usar o checklist?</summary>
+        <p>Não. Cada item explica o que observar em linguagem simples. Para os pontos mais técnicos, como o scanner OBD-II, vale levar o carro a um mecânico de confiança.</p>
+      </details>
+      <details class="reveal">
+        <summary>Meu progresso fica salvo?</summary>
+        <p>Sim. As marcações, o modelo e a placa ficam salvos no próprio navegador. Use "Recomeçar checagem" para limpar tudo.</p>
+      </details>
+      <details class="reveal">
+        <summary>O site consulta a placa em bases oficiais?</summary>
+        <p>Não. A placa serve para identificar o veículo no relatório. Para consultar débitos, recall e restrições, use os serviços oficiais indicados na seção Consultas.</p>
+      </details>
+      <details class="reveal">
+        <summary>Como gero o relatório em PDF?</summary>
+        <p>Clique em "Relatório PDF" na barra inferior e escolha "Salvar como PDF" na janela de impressão.</p>
+      </details>
+    </div>
+  </div>
+</section>
+
+<footer class="site-foot">
+  <div class="sec-in">
+    <a class="logo" href="#topo"><span class="logo-mark"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 6v6c0 4.5 3.4 8.3 8 9 4.6-.7 8-4.5 8-9V6z"/><path d="m8.5 12 2.5 2.5 4.5-5"/></svg></span><span>Clear<b>Inspect</b></span></a>
+    <p>Transparência absoluta na compra do seu carro usado. Projeto acadêmico de Web Design.</p>
+  </div>
+</footer>
+
+<!-- Relatório para impressão (preenchido pelo script) -->
+<section id="printout" class="printout" aria-hidden="true"></section>
+
+<!-- Barra fixa de progresso -->
+<footer class="dock">
+  <div class="bar"><i id="fill"></i></div>
+  <div class="foot">
+    <div><div class="lbl">Saúde geral</div><div class="val" id="health">0% Avaliado</div></div>
+    <div class="acts">
+      <button class="btn sq" id="fipe" title="Abrir Tabela FIPE" aria-label="Consultar Tabela FIPE">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2.5" width="14" height="19" rx="2"/><path d="M8.5 6.5h7M8.5 11h.01M12 11h.01M15.5 11h.01M8.5 14.5h.01M12 14.5h.01M15.5 14.5h.01M8.5 18h.01M12 18h.01M15.5 18h.01"/></svg>
+      </button>
+      <button class="btn pdf" id="pdf">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg>
+        <span>Relatório PDF</span>
+      </button>
+    </div>
+  </div>
+</footer>
+<button class="help" aria-label="Ajuda" id="help">?</button>
+
+<dialog class="modal" id="helpDlg">
+  <h3>Como usar o ClearInspect</h3>
+  <ol>
+    <li>Busque o modelo do carro e informe a placa.</li>
+    <li>Clique nos pontos numerados do carro 3D ou nas abas para escolher uma etapa.</li>
+    <li>Abra cada cartão para ver detalhes e marque o círculo quando concluir.</li>
+    <li>No final, gere o relatório em PDF.</li>
+  </ol>
+  <form method="dialog"><button class="btn-cta">Entendi</button></form>
+</dialog>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="script.js"></script>
+<script src="car3d.js"></script>
+</body>
+</html>
