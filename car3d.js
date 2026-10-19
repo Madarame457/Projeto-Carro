@@ -602,20 +602,25 @@ function placeHotspots(){
 
 let visible=true;
 new IntersectionObserver(es=>{visible=es[0].isIntersecting;}).observe(box);
-function loop(now){
-  requestAnimationFrame(loop);
+function frame(now){
   const dt=Math.min(Math.max((now-lastT)/1000,0),.05);lastT=now;
   idle+=dt;
   if(!drag&&idle>4&&!reduce)yawT+=dt*.22;
   yaw+=(yawT-yaw)*Math.min(1,dt*6);
   pitch+=(pitchT-pitch)*Math.min(1,dt*6);
   pivot.rotation.y=yaw;
-  if(pop<1){pop=Math.min(1,pop+dt*2.5);const e=1-Math.pow(1-pop,3);car.group.scale.set(1,.85+.15*e,1);car.group.position.y=(1-e)*.25;}
-  camera.position.set(0,.85+Math.sin(pitch)*dist,Math.cos(pitch)*dist);
-  camera.lookAt(0,.85,0);
+  if(pop<1){pop=Math.min(1,pop+dt*2.5);const e=1-Math.pow(1-pop,3);car.group.scale.set(1,.9+.1*e,1);car.group.position.y=(1-e)*.2;}
+  const ty=car.H*.42;
+  camera.position.set(0,ty+Math.sin(pitch)*dist,Math.cos(pitch)*dist);
+  camera.lookAt(0,ty,0);
   pivot.updateMatrixWorld(true);
   renderer.render(scene,camera);
   placeHotspots();
+}
+function loop(now){
+  requestAnimationFrame(loop);
+  if(!visible||!car)return;
+  frame(now);
 }
 
 setType(CI.type);
