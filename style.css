@@ -227,6 +227,8 @@ h4{margin:0 0 6px;font-size:18px;font-weight:600;letter-spacing:-.3px}
 .site-foot{padding:40px 0;text-align:center;color:var(--muted);font-size:14px}
 .site-foot .logo{justify-content:center;color:var(--text)}
 .site-foot p{margin:12px 0 0}
+.site-foot .credits{max-width:760px;margin:14px auto 0;font-size:12.5px;line-height:1.6;color:#7f879a}
+.site-foot .credits a{color:#a9bbff}
 
 /* Barra fixa inferior */
 .dock{position:fixed;left:0;right:0;bottom:0;z-index:25;background:rgba(18,21,29,.9);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px)}
