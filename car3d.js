@@ -121,10 +121,49 @@ function curve(pts){
     return (2*t3-3*t2+1)*Y[i]+(t3-2*t2+t)*h*m[i]+(-2*t3+3*t2)*Y[i+1]+(t3-t2)*h*m[i+1];
   };
 }
-function path(start,segs){
-  const s=new THREE.Shape();s.moveTo(start[0],start[1]);
-  segs.forEach(p=>p[0]==='L'?s.lineTo(p[1],p[2]):s.quadraticCurveTo(p[1],p[2],p[3],p[4]));
-  return s;
+// Arredondamento circular das pontas: começa a raio "r" da extremidade e termina tangente
+const round=(d,r)=>d>=r?0:r-Math.sqrt(Math.max(0,r*r-(r-d)*(r-d)));
+
+/* ---------- Especificações das carrocerias (metros; frente = +x) ---------- */
+// yb: linha inferior, yt: linha de cintura/capô/porta-malas, roof: perfil da estufa,
+// side: janelas laterais, roofX: trecho do teto pintado, B: coluna central, doors: recortes.
+const SPECS={
+ hatch:{F:2.0,R:-2.05,W:1.74,r:.315,ax:[1.27,-1.28],rc:[.22,.2,.075,.07,.05,.05],trimH:.055,nt:5.2,ng:3.2,gap:.05,hl:[.085,.14],
+  yb:[[-2.05,.38],[-1.75,.28],[-1.28,.26],[1.27,.25],[1.7,.26],[2,.29]],
+  yt:[[-2.05,.96],[-1.6,.955],[-.6,.93],[.4,.895],[.86,.87],[1.4,.82],[1.7,.79],[2,.75]],
+  gh:[.86,-1.96],roof:[[.45,1.15],[.05,1.36],[-.3,1.435],[-.9,1.43],[-1.35,1.39],[-1.66,1.30],[-1.86,1.12]],
+  roofX:[-1.6,.02],side:[.66,-1.36],B:-.36,doors:[.80,-.36,-1.06],hood:1.36},
+ sedan:{F:2.315,R:-2.315,W:1.78,r:.325,ax:[1.38,-1.32],rc:[.24,.24,.08,.08,.05,.05],trimH:.055,nt:5.2,ng:3.2,gap:.05,hl:[.085,.14],
+  yb:[[-2.315,.36],[-2.0,.28],[-1.32,.25],[1.38,.24],[2.0,.25],[2.315,.28]],
+  yt:[[-2.315,.95],[-1.9,.972],[-1.6,.972],[-1.1,.955],[-.2,.925],[.6,.89],[.98,.87],[1.6,.83],[2.0,.79],[2.315,.73]],
+  gh:[.98,-1.62],roof:[[.55,1.17],[.12,1.36],[-.15,1.42],[-.6,1.44],[-.95,1.40],[-1.25,1.25]],
+  roofX:[-.96,.06],side:[.78,-1.32],B:-.30,doors:[.92,-.30,-1.12],hood:1.5},
+ suv:{F:2.21,R:-2.21,W:1.84,r:.36,ax:[1.33,-1.31],rc:[.18,.16,.07,.07,.06,.06],trimH:.11,clad:true,rails:true,nt:6.5,ng:3.8,gap:.06,hl:[.09,.15],
+  yb:[[-2.21,.46],[-1.9,.38],[-1.31,.37],[1.33,.37],[1.9,.39],[2.21,.42]],
+  yt:[[-2.21,1.07],[-1.7,1.075],[-.6,1.055],[.5,1.025],[1.0,1.0],[1.55,.985],[1.9,.97],[2.21,.94]],
+  gh:[1.0,-2.12],roof:[[.6,1.33],[.22,1.575],[-.05,1.645],[-1.5,1.66],[-1.9,1.62],[-2.06,1.45]],
+  roofX:[-1.94,-.02],side:[.84,-1.82],B:-.30,C2:-1.22,doors:[.92,-.30,-1.08],hood:1.55},
+ picape:{F:2.6,R:-2.7,W:1.86,r:.375,ax:[1.62,-1.46],rc:[.15,.08,.06,.04,.06,.05],trimH:.11,clad:true,bed:-.93,nt:7,ng:4,gap:.06,hl:[.10,.16],
+  yb:[[-2.7,.50],[-2.45,.44],[-1.46,.42],[1.62,.41],[2.3,.43],[2.6,.45]],
+  yt:[[-2.7,1.13],[-.95,1.14],[.3,1.12],[1.25,1.10],[1.9,1.09],[2.3,1.08],[2.6,1.05]],
+  gh:[1.25,-.88],roof:[[.85,1.42],[.5,1.71],[.2,1.79],[-.68,1.79],[-.83,1.62]],
+  roofX:[-.74,.16],side:[1.08,-.72],B:-.02,doors:[1.14,-.02,-.86],hood:1.8}
+};
+
+/* ---------- Seção transversal da carroceria ---------- */
+const NB=6;                   // expoente da superelipse na parte de baixo (o do ombro vem de cada tipo)
+function section(T,x){
+  const L=T.F-T.R,dF=T.F-x,dR=x-T.R,front=dF<dR,d=Math.max(0,front?dF:dR);
+  const [hF,hR,tF,tR,bF,bR]=T.rc;
+  let hw=T.W/2*T.plan(x);
+  T.ax.forEach(a=>{hw*=1+.012*Math.exp(-(((x-a)/.5)**2));}); // leve alargamento sobre as rodas
+  hw-=round(d,front?hF:hR);
+  const yt=T.ytf(x)-round(d,front?tF:tR);
+  const yb=T.ybf(x)+round(d,front?bF:bR);
+  let clip=-1;
+  T.ax.forEach(a=>{const dx=x-a;if(Math.abs(dx)<T.ar)clip=Math.max(clip,T.r+.02+Math.sqrt(T.ar*T.ar-dx*dx));});
+  const yw=yb+(yt-yb)*.56;
+  return {x,yb,yt,hw:Math.max(hw,.001),yw,clip,nt:T.nt,bed:T.bed!==undefined&&x<T.bed-.02&&x>T.R+.1};
 }
 function wheel(T){
   const w=new THREE.Group(),r=T.r;
