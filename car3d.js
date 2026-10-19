@@ -288,7 +288,43 @@ function wheel(r){
   wheelCache[r]=w;return w.clone();
 }
 
-// Monta um carro e devolve também as âncoras dos pontos de checagem
+/* ---------- Placa Mercosul com o texto informado pelo usuário ---------- */
+const plateCv=document.createElement('canvas');plateCv.width=512;plateCv.height=166;
+const plateTex=new THREE.CanvasTexture(plateCv);plateTex.colorSpace=THREE.SRGBColorSpace;plateTex.anisotropy=4;
+function drawPlate(txt){
+  txt=String(txt||'').toUpperCase();if(/^[A-Z]{3}\d{4}$/.test(txt))txt=txt.slice(0,3)+'-'+txt.slice(3);
+  const g=plateCv.getContext('2d');
+  g.fillStyle='#f4f5f7';g.fillRect(0,0,512,166);
+  g.fillStyle='#1f3fa5';g.fillRect(0,0,512,38);
+  g.fillStyle='#fff';g.font='700 24px Inter,Arial,sans-serif';g.textAlign='center';g.textBaseline='middle';g.fillText('BRASIL',256,20);
+  g.fillStyle='#009c3b';g.fillRect(452,10,34,20);g.fillStyle='#ffdf00';g.beginPath();g.moveTo(469,12);g.lineTo(484,20);g.lineTo(469,28);g.lineTo(454,20);g.fill();
+  g.fillStyle='#14161a';g.font='700 96px "JetBrains Mono",ui-monospace,monospace';g.fillText(txt||'ABC1D23',256,106);
+  g.strokeStyle='#1d1f24';g.lineWidth=8;g.strokeRect(4,4,504,158);
+  plateTex.needsUpdate=true;
+}
+drawPlate(CI.plate);
+const plateM=new THREE.MeshStandardMaterial({map:plateTex,roughness:.45,metalness:.1});
+
+// Textura de colmeia para a grade
+const hexTex=(()=>{
+  const cv=document.createElement('canvas');cv.width=cv.height=128;const g=cv.getContext('2d');
+  g.fillStyle='#0b0c0f';g.fillRect(0,0,128,128);g.strokeStyle='#2a2e36';g.lineWidth=5;
+  const hx=(cx,cy,r)=>{g.beginPath();for(let k=0;k<6;k++){const a=Math.PI/3*k+Math.PI/6;g.lineTo(cx+Math.cos(a)*r,cy+Math.sin(a)*r);}g.closePath();g.stroke();};
+  for(let y=0;y<4;y++)for(let x=-1;x<4;x++)hx(x*37+(y%2?18.5:0)+10,y*32+16,19);
+  const t=new THREE.CanvasTexture(cv);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.colorSpace=THREE.SRGBColorSpace;return t;
+})();
+
+function rrectShape(w,h,r){
+  const s=new THREE.Shape(),x=-w/2,y=-h/2;
+  s.moveTo(x+r,y);s.lineTo(x+w-r,y);s.quadraticCurveTo(x+w,y,x+w,y+r);s.lineTo(x+w,y+h-r);s.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+  s.lineTo(x+r,y+h);s.quadraticCurveTo(x,y+h,x,y+h-r);s.lineTo(x,y+r);s.quadraticCurveTo(x,y,x+r,y);return s;
+}
+// Peça plana colada numa das tampas (frente: dir=1, traseira: dir=-1)
+function capPiece(g,geo,mat,x,y,z,dir){
+  const m=new THREE.Mesh(geo,mat);m.position.set(x,y,z);m.rotation.y=dir>0?Math.PI/2:-Math.PI/2;g.add(m);return m;
+}
+
+/* ---------- Montagem do carro ---------- */
 function buildCar(type){
   const T=TYPES[type],g=new THREE.Group(),ar=T.r+.08,W=T.W;
   // Carroceria inferior com recortes das caixas de roda
