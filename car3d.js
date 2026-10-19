@@ -493,11 +493,31 @@ function buildCar(type){
     mg.add(shell,glassM,arm,sig);mg.position.set(xa-.1,y,z);mg.rotation.y=.12;
     mg.traverse(o=>{if(o.isMesh)o.castShadow=true;});return mg;
   });
-  // Rodas
-  [fa,ra].forEach(x=>[-1,1].forEach(z=>{
-    const w=wheel(T);w.position.set(x,T.r,z*(W/2-.13));
-    if(z<0)w.rotation.y=Math.PI;
-    g.add(w);
+
+  // 8) Barras de teto (SUV), antena e caçamba
+  const ry0=T.roofX[0],ry1=T.roofX[1];
+  if(T.rails)both(g,()=>{
+    const pts=[];for(let k=0;k<=12;k++){const x=lerp(ry0+.05,ry1-.05,k/12);const S=section(T,x);pts.push(new Vector3(x,yr(x)+.045-(k===0||k===12?.03:0),S.hw*.95*.6));}
+    const m=new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts),48,.013,8),M.chrome);m.castShadow=true;return m;
+  });
+  const fin=new THREE.Mesh(new THREE.SphereGeometry(1,20,12,0,Math.PI*2,0,Math.PI/2),M.gloss);
+  fin.scale.set(.09,.04,.025);fin.position.set(ry0+.1,yr(ry0+.1)-.004,0);g.add(fin);
+  if(T.bed!==undefined){
+    both(g,()=>decal(T,T.bed-.035,T.bed-.025,S=>[thAtY(S,S.yb+T.trimH+.01),Math.PI/2-.001],.0015,M.void,1,24));
+    const bar=new THREE.Mesh(new THREE.BoxGeometry(.04,.12,T.W*.86),M.gloss);
+    bar.position.set(T.bed-.08,T.ytf(T.bed)+.03,0);g.add(bar);
+  }
+
+  if(T.spoiler){
+    const sx=T.roofX[0]-.06,sp=new THREE.Mesh(new THREE.BoxGeometry(.2,.022,T.W*.78),M.gloss);
+    sp.position.set(sx,yr(sx)+.012,0);sp.rotation.z=-.12;sp.castShadow=true;g.add(sp);
+  }
+  // 9) Rodas e paredes internas das caixas de roda
+  const tz=section(T,fa).hw*.985-T.r*.34;
+  T.ax.forEach(x=>[-1,1].forEach(z=>{
+    const w=wheel(T.r);w.position.set(x,T.r,z*tz);if(z<0)w.rotation.y=Math.PI;g.add(w);
+    const liner=new THREE.Mesh(new THREE.CircleGeometry(T.ar,40,0,Math.PI),M.void);
+    liner.position.set(x,T.r+.02,z*(tz-T.r*.36));if(z<0)liner.rotation.y=Math.PI;g.add(liner);
   }));
   // Centraliza no comprimento
   const cx=(T.F+T.R)/2;g.children.forEach(m=>m.position.x-=cx);
