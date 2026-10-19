@@ -21,20 +21,31 @@ box.prepend(renderer.domElement);
 const scene=new THREE.Scene();
 const camera=new THREE.PerspectiveCamera(28,1,.1,100);
 
-// Ambiente de reflexo: "estúdio" com softboxes, convertido em mapa de ambiente
+/* ---------- Iluminação de estúdio (vira mapa de reflexo) ---------- */
 (function(){
   const env=new THREE.Scene();
-  env.add(new THREE.Mesh(new THREE.SphereGeometry(20,24,12),new THREE.MeshBasicMaterial({color:0x151a26,side:THREE.BackSide})));
-  const panel=(w,h,c,x,y,z)=>{
-    const m=new THREE.Mesh(new THREE.PlaneGeometry(w,h),new THREE.MeshBasicMaterial({color:c,side:THREE.DoubleSide}));
+  const sg=new THREE.SphereGeometry(30,64,32),cols=[],c=new THREE.Color();
+  const floor=new THREE.Color(0x07080b),hor=new THREE.Color(0x58607a),top=new THREE.Color(0x161b26);
+  for(let i=0;i<sg.attributes.position.count;i++){
+    const t=sg.attributes.position.getY(i)/30;
+    if(t<0)c.copy(hor).lerp(floor,Math.min(1,-t*6));
+    else c.copy(hor).lerp(top,Math.min(1,t*2.2));
+    cols.push(c.r,c.g,c.b);
+  }
+  sg.setAttribute('color',new THREE.Float32BufferAttribute(cols,3));
+  env.add(new THREE.Mesh(sg,new THREE.MeshBasicMaterial({vertexColors:true,side:THREE.BackSide})));
+  const panel=(w,h,k,x,y,z,tint=[1,1,1])=>{
+    const m=new THREE.Mesh(new THREE.PlaneGeometry(w,h),new THREE.MeshBasicMaterial({color:new THREE.Color(k*tint[0],k*tint[1],k*tint[2]),side:THREE.DoubleSide}));
     m.position.set(x,y,z);m.lookAt(0,0,0);env.add(m);
   };
-  panel(10,5,new THREE.Color(2.4,2.4,2.6),0,12,0);
-  panel(10,3,new THREE.Color(1.6,1.9,3),-12,4,5);
-  panel(10,3,new THREE.Color(3,2.6,2),12,5,-4);
-  panel(16,2,new THREE.Color(1.2,1.4,2.2),0,3,-13);
+  panel(18,7,3.2,0,16,0);                       // softbox superior
+  panel(30,1.6,2.8,0,2.6,14);  panel(30,1.6,2.8,0,2.6,-14); // tiras laterais (linhas de reflexo)
+  panel(30,.6,1.6,0,9,14);   panel(30,.6,1.6,0,9,-14);
+  panel(8,5,3.4,15,6,6,[1,.92,.82]);            // luz principal quente
+  panel(8,5,2.4,-15,5,-6,[.75,.85,1.15]);       // contraluz frio
+  panel(10,3,1.4,-4,3,-16,[.8,.9,1.2]);
   const pm=new THREE.PMREMGenerator(renderer);
-  scene.environment=pm.fromScene(env,.04).texture;
+  scene.environment=pm.fromScene(env,.02).texture;
   pm.dispose();
 })();
 const sun=new THREE.DirectionalLight(0xffffff,1.4);
