@@ -383,15 +383,29 @@ h4{margin:0 0 6px;font-size:18px;font-weight:600;letter-spacing:-.3px}
   .rp-empty{display:flex;align-items:center;gap:8px;margin:0;color:#166534;font-weight:600}
   .rp-empty svg{width:16px;height:16px}
 
-  .printout{display:block;font-family:Inter,Arial,sans-serif}
-  .printout h1{font-size:22px;letter-spacing:-.5px;margin:0 0 6px;color:#111;background:none}
-  .printout .pmeta{margin:0 0 18px;font-size:13px;color:#444}
-  .printout h2{font-size:16px;margin:18px 0 8px;letter-spacing:0;padding-bottom:4px;border-bottom:2px solid #2c449f}
-  .printout h2 small{color:#666;font-weight:500}
-  .printout ul{list-style:none;margin:0;padding:0}
-  .printout li{display:flex;gap:10px;padding:7px 0;border-bottom:1px solid #e5e7eb;font-size:12.5px;line-height:1.45;break-inside:avoid}
-  .printout .box{flex:none;width:16px;height:16px;border:1.5px solid #555;border-radius:3px;display:grid;place-items:center;font-size:12px;font-weight:700}
-  .printout li.ok .box{background:#22c55e;border-color:#22c55e;color:#fff}
+  .rp-stage{margin-bottom:14px}
+  .rp-stage-h{display:flex;justify-content:space-between;align-items:center;padding:7px 12px;border-radius:7px 7px 0 0;background:#141821;color:#fff;break-after:avoid}
+  .rp-stage-h span{font-size:7.8pt;color:#c5c9d4}
+  .rp-items tr{break-inside:avoid}
+  .rp-items td{padding:7px 10px;border-bottom:1px solid #eef0f5;vertical-align:top}
+  .rp-ic{width:22px}
+  .rp-ic svg{width:16px;height:16px;margin-top:1px;color:#b3b8c4}
+  .rp-items tr.ok .rp-ic svg{color:#16a34a}
+  .rp-items b{font-size:9.3pt}
+  .rp-items p{margin:2px 0 0;color:#3a4050;font-size:8.4pt}
+  .rp-items .rp-tip{color:#5b6273}
+  .rp-tip span{font-weight:700;color:#2c449f}
+  .rp-meta{width:96px;text-align:right}
+  .rp-res{display:block;margin-top:5px;font-size:7.4pt;font-weight:700;color:#9aa0ad}
+  .rp-items tr.ok .rp-res{color:#16a34a}
+
+  .rp-close{break-inside:avoid}
+  .rp-lines i{display:block;height:24px;border-bottom:1px solid #d5d9e2}
+  .rp-sign{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:26px;margin-top:38px}
+  .rp-sign i{display:block;height:28px;border-bottom:1px solid #141821}
+  .rp-sign span{display:block;margin-top:5px;text-align:center;font-size:7.8pt;color:#5b6273}
+  .rp-legal{margin:20px 0 0;padding:10px 12px;border-radius:8px;background:#f5f6f9;font-size:7.4pt;line-height:1.5;color:#5b6273}
+  .rp-foot{display:none}
 }
 @media (prefers-reduced-motion:reduce){
   *{transition:none!important;animation:none!important}
