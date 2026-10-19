@@ -465,9 +465,33 @@ function buildCar(type){
     fshape([[iz,iTop],[-iz,iTop],[-iz-.04,iBot],[iz+.04,iBot]],gm,0,false);
     both(g,()=>{const m=new THREE.Mesh(new THREE.CircleGeometry(.03,24),M.lens);m.position.set(fx+.002,iBot+(iTop-iBot)*.5,iz+.03);m.rotation.y=Math.PI/2;return m;});
   }
-  if(T.rails)[-1,1].forEach(z=>{
-    const rl=new THREE.Mesh(new THREE.BoxGeometry(r1-r0-.2,.04,.05),black);
-    rl.position.set((r0+r1)/2,ry+.1,z*cabW*.4);g.add(rl);
+  const ply=Math.max(iBot+.075,Math.min(iTop-.02,(iTop+iBot)/2));
+  capPiece(g,new THREE.PlaneGeometry(.4,.13),plateM,fx+.004,ply,0,1);
+  const gy=(gTop+gBot)/2;
+  // Traseira: barra de luz, placa, refletores e escapamento
+  capPiece(g,new THREE.PlaneGeometry(SR.hw*2-.12,.01),M.tailLed,rx,SR.yt-.084,0,-1);
+  capPiece(g,new THREE.PlaneGeometry(SR.hw*2-.04,.08),M.tail,rx+.001,SR.yt-.084,0,-1);
+  const py=SR.yb+T.trimH+.13;
+  capPiece(g,new THREE.ShapeGeometry(rrectShape(.48,.18,.02),2),M.trim,rx,py,0,-1);
+  capPiece(g,new THREE.PlaneGeometry(.4,.13),plateM,rx-.002,py,0,-1);
+  both(g,()=>{const m=new THREE.Mesh(new THREE.PlaneGeometry(.12,.02),M.tail);m.position.set(rx,SR.yb+T.trimH*.6+.02,SR.hw*.7);m.rotation.y=-Math.PI/2;return m;});
+  const ex=new THREE.Mesh(new THREE.CylinderGeometry(.03,.03,.12,20,1,true),M.chrome);
+  ex.rotation.z=Math.PI/2;ex.position.set(T.R+.04,T.ybf(T.R)+.04,SR.hw*.55);g.add(ex);
+  // Logo genérico na grade e na tampa traseira
+  const logoG=new THREE.TorusGeometry(.032,.006,8,32);
+  capPiece(g,logoG,M.chrome,fx+.008,gy,0,1);
+  if(T.bed!==undefined)capPiece(g,new THREE.ShapeGeometry(rrectShape(.16,.035,.015),2),M.trim,rx,SR.yt-.12,0,-1);
+  else capPiece(g,logoG,M.chrome,rx-.006,SR.yt-.12,0,-1);
+
+  // 7) Retrovisores
+  both(g,()=>{
+    const mg=new THREE.Group(),Sa=section(T,xa-.06),y=topYAtZ(Sa,Sa.hw*.9)+.06,z=Sa.hw*.95+.075;
+    const shell=new THREE.Mesh(new THREE.SphereGeometry(1,28,18),M.paint);shell.scale.set(.06,.055,.105);
+    const glassM=new THREE.Mesh(new THREE.CircleGeometry(1,24),M.gloss);glassM.scale.set(.045,.085,1);glassM.rotation.y=-Math.PI/2;glassM.position.x=-.045;
+    const arm=new THREE.Mesh(new THREE.BoxGeometry(.06,.03,.08),M.trim);arm.position.set(.01,-.035,-.06);
+    const sig=new THREE.Mesh(new THREE.BoxGeometry(.01,.008,.08),M.amber);sig.position.set(.035,-.02,.02);
+    mg.add(shell,glassM,arm,sig);mg.position.set(xa-.1,y,z);mg.rotation.y=.12;
+    mg.traverse(o=>{if(o.isMesh)o.castShadow=true;});return mg;
   });
   // Rodas
   [fa,ra].forEach(x=>[-1,1].forEach(z=>{
