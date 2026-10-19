@@ -23,7 +23,9 @@ const DATA=[
   ["Diferenças de Pintura","Olhe a lataria em ângulo, sob luz natural, procurando variações de tom ou textura.","Pontos foscos, marcas de fita e respingos em borrachas indicam repintura.","i"],
   ["Pneus e Vidros","Verifique o desgaste dos pneus, a data de fabricação e trincas nos vidros.","Desgaste desigual pode apontar problemas de suspensão ou alinhamento.","i"],
   ["Estrutura e Longarinas","Abra capô e porta-malas e procure soldas, longarinas amassadas e parafusos com a tinta riscada.","Parafusos de para-lamas e dobradiças sem tinta mostram que a peça foi removida. Estrutura reparada desvaloriza o carro e compromete a segurança.","c"],
-  ["Gravações nos Vidros e Etiquetas","Confira se o final do chassi gravado nos vidros e nas etiquetas (porta, coluna, motor) é o mesmo do documento.","Vidro sem gravação ou com marca diferente indica troca: pergunte o motivo. Etiqueta raspada ou ausente é sinal de alerta.","c"]]},
+  ["Gravações nos Vidros e Etiquetas","Confira se o final do chassi gravado nos vidros e nas etiquetas (porta, coluna, motor) é o mesmo do documento.","Vidro sem gravação ou com marca diferente indica troca: pergunte o motivo. Etiqueta raspada ou ausente é sinal de alerta.","c"],
+  ["Ferrugem e Corrosão","Inspecione caixas de roda, soleiras, parte inferior das portas, porta-malas e assoalho.","Bolhas na pintura costumam esconder ferrugem por baixo. Carros de cidades litorâneas merecem atenção extra.","i"],
+  ["Faróis, Lanternas e Setas","Teste farol baixo e alto, luz de freio, ré, pisca e neblina. Observe se as lentes estão foscas ou com umidade.","Um farol muito mais novo que o outro pode indicar batida na dianteira.","r"]]},
  {n:"3. Checagem Mecânica",t:"Checagem: Mecânica",i:"sliders",items:[
   ["Motor e Fluidos","Confira nível e cor do óleo, líquido de arrefecimento e vazamentos sob o carro.","Óleo muito escuro ou com aspecto leitoso é sinal de alerta.","c"],
   ["Suspensão e Freios","Teste freios em baixa velocidade e escute ruídos ao passar em buracos.","Puxões para um lado ou vibração no pedal exigem revisão.","c"],
