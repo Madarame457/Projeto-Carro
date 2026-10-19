@@ -195,6 +195,19 @@ function topYAtZ(S,z){
   return ringPt(S,(a+b)/2,p).y;
 }
 
+// Parâmetros distribuídos por comprimento de arco (pontos igualmente espaçados na curva)
+function arcParams(f,t0,t1,n,inclusive){
+  const K=3000,cum=[0],ts=[t0];let a=f(t0);
+  for(let k=1;k<=K;k++){const t=t0+(t1-t0)*k/K,b=f(t);cum.push(cum[k-1]+Math.hypot(b.y-a.y,b.z-a.z));ts.push(t);a=b;}
+  const tot=cum[K],out=[];let k=0;const m=inclusive?n:n-1;
+  for(let j=0;j<=m;j++){
+    if(!inclusive&&j===n)break;
+    const tg=tot*j/n;while(k<K&&cum[k+1]<tg)k++;
+    const u=(tg-cum[k])/Math.max(1e-9,cum[k+1]-cum[k]);out.push(lerp(ts[k],ts[Math.min(K,k+1)],clamp(u,0,1)));
+  }
+  return out;
+}
+
 // Monta um carro e devolve também as âncoras dos pontos de checagem
 function buildCar(type){
   const T=TYPES[type],g=new THREE.Group(),ar=T.r+.08,W=T.W;
