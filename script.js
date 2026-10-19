@@ -21,7 +21,9 @@ const DATA=[
  {n:"2. Visual Externo",t:"Checagem: Visual Externo",i:"car",items:[
   ["Alinhamento da Lataria","Observe frestas entre portas, capô e porta-malas: devem ter espessura uniforme.","Frestas irregulares podem indicar colisão e reparo mal feito.","i"],
   ["Diferenças de Pintura","Olhe a lataria em ângulo, sob luz natural, procurando variações de tom ou textura.","Pontos foscos, marcas de fita e respingos em borrachas indicam repintura.","i"],
-  ["Pneus e Vidros","Verifique o desgaste dos pneus, a data de fabricação e trincas nos vidros.","Desgaste desigual pode apontar problemas de suspensão ou alinhamento.","i"]]},
+  ["Pneus e Vidros","Verifique o desgaste dos pneus, a data de fabricação e trincas nos vidros.","Desgaste desigual pode apontar problemas de suspensão ou alinhamento.","i"],
+  ["Estrutura e Longarinas","Abra capô e porta-malas e procure soldas, longarinas amassadas e parafusos com a tinta riscada.","Parafusos de para-lamas e dobradiças sem tinta mostram que a peça foi removida. Estrutura reparada desvaloriza o carro e compromete a segurança.","c"],
+  ["Gravações nos Vidros e Etiquetas","Confira se o final do chassi gravado nos vidros e nas etiquetas (porta, coluna, motor) é o mesmo do documento.","Vidro sem gravação ou com marca diferente indica troca: pergunte o motivo. Etiqueta raspada ou ausente é sinal de alerta.","c"]]},
  {n:"3. Checagem Mecânica",t:"Checagem: Mecânica",i:"sliders",items:[
   ["Motor e Fluidos","Confira nível e cor do óleo, líquido de arrefecimento e vazamentos sob o carro.","Óleo muito escuro ou com aspecto leitoso é sinal de alerta.","c"],
   ["Suspensão e Freios","Teste freios em baixa velocidade e escute ruídos ao passar em buracos.","Puxões para um lado ou vibração no pedal exigem revisão.","c"],
