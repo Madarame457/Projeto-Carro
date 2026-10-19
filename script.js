@@ -13,7 +13,9 @@ const DATA=[
  {n:"1. Anúncio e Preço",t:"Checagem: Anúncio e Preço",i:"trend",items:[
   ["Verificar Chassi (VIN) e Histórico","Verifique o número do chassi (VIN) em um serviço de histórico veicular confiável.","Confira se o chassi do anúncio bate com o do documento e com a gravação no veículo. Consulte leilão, sinistro, recall e restrições.","c"],
   ["Comparação de Valor de Mercado","Garanta que o preço pedido esteja alinhado com o valor de mercado atual (Tabela FIPE, Webmotors, KBB).","Compare com pelo menos três anúncios do mesmo modelo, ano e quilometragem. Preço muito abaixo da média merece desconfiança.","i"],
-  ["Análise do Perfil do Vendedor","Verifique há quanto tempo ele possui o carro. Se for menos de um ano, pergunte o motivo da venda.","Prefira vendedores que apresentem notas de revisão e documentos em nome próprio.","i"]]},
+  ["Análise do Perfil do Vendedor","Verifique há quanto tempo ele possui o carro. Se for menos de um ano, pergunte o motivo da venda.","Prefira vendedores que apresentem notas de revisão e documentos em nome próprio.","i"],
+  ["Fotos e Descrição do Anúncio","Compare as fotos com o carro ao vivo: cor, rodas, acessórios, versão e quilometragem devem bater.","Fotos só de longe, com placa escondida ou tiradas na chuva pedem cautela. Faça uma busca reversa da imagem para ver se ela não foi copiada de outro anúncio.","i"],
+  ["Quilometragem Compatível","A média brasileira fica entre 12 e 15 mil km por ano. O desgaste de volante, pedais e bancos deve condizer com o hodômetro.","Hodômetro baixo com volante liso, pedais gastos e banco do motorista afundado indica possível adulteração.","c"]]},
  {n:"2. Visual Externo",t:"Checagem: Visual Externo",i:"car",items:[
   ["Alinhamento da Lataria","Observe frestas entre portas, capô e porta-malas: devem ter espessura uniforme.","Frestas irregulares podem indicar colisão e reparo mal feito.","i"],
   ["Diferenças de Pintura","Olhe a lataria em ângulo, sob luz natural, procurando variações de tom ou textura.","Pontos foscos, marcas de fita e respingos em borrachas indicam repintura.","i"],
