@@ -519,16 +519,20 @@ function buildCar(type){
     const liner=new THREE.Mesh(new THREE.CircleGeometry(T.ar,40,0,Math.PI),M.void);
     liner.position.set(x,T.r+.02,z*(tz-T.r*.36));if(z<0)liner.rotation.y=Math.PI;g.add(liner);
   }));
-  // Centraliza no comprimento
-  const cx=(T.F+T.R)/2;g.children.forEach(m=>m.position.x-=cx);
-  const V=(x,y,z)=>new THREE.Vector3(x-cx,y,z);
-  const belt=T.cab[0][1];
-  return {group:g,len,W,anchors:[
-    {p:V((r0+r1)/2-.35,belt+.22,cabW/2+.1),n:new THREE.Vector3(0,0,1)},                   // 1 anúncio: etiqueta no vidro
-    {p:V(fa-.75,belt-.32,W/2+.02),n:new THREE.Vector3(0,0,1)},                            // 2 lataria: porta dianteira
-    {p:V(T.F-.6,belt+.02,0),n:new THREE.Vector3(.75,.65,.2).normalize()},                // 3 mecânica: capô
-    {p:V(T.plate[0]-.03,T.plate[1],0),n:new THREE.Vector3(-1,0,0)},                       // 4 documentação: placa
-    {p:V(ra,T.r,W/2+.02),n:new THREE.Vector3(0,0,1)}                                       // 5 rodagem: roda traseira
+
+  // Âncoras dos pontos clicáveis
+  const at=(x,y)=>{const S=section(T,x);ringPt(S,thAtY(S,y),p);return p.z;};
+  const gi=ginfo[Math.floor(ginfo.length*.55)]||ginfo[0];
+  const xw=(T.side[0]+T.B)/2,iw=ginfo.reduce((b,v)=>Math.abs(v.x-xw)<Math.abs(b.x-xw)?v:b,gi);
+  const xd=(T.doors[0]+T.doors[1])/2,Sd=section(T,xd),yd=(Sd.yw+Sd.yt)/2-.04;
+  const xh=T.F-hl-.25;
+  const H=Math.max(...ginfo.map(v=>v.top));
+  return {group:g,len:L,W:T.W,H,anchors:[
+    {p:new Vector3(xw,lerp(iw.base,iw.top,.5),section(T,xw).hw*.9),n:new Vector3(0,.15,1).normalize()}, // 1 anúncio: etiqueta no vidro
+    {p:new Vector3(xd,yd,at(xd,yd)+.01),n:new Vector3(0,0,1)},                                           // 2 lataria: porta dianteira
+    {p:new Vector3(xh,T.ytf(xh)+.01,0),n:new Vector3(.45,.9,0).normalize()},                            // 3 mecânica: capô
+    {p:new Vector3(T.R-.02,py,0),n:new Vector3(-1,0,0)},                                                 // 4 documentação: placa
+    {p:new Vector3(ra,T.r,tz+T.r*.34),n:new Vector3(0,0,1)}                                              // 5 rodagem: roda traseira
   ]};
 }
 
