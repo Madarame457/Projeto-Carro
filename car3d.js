@@ -410,6 +410,17 @@ function buildCar(type){
   },[M.paint,M.glass,M.gloss]);
   gh.castShadow=true;g.add(gh);
 
+  // 4) Frisos das portas e maçanetas
+  const gap=x=>both(g,()=>decal(T,x-.003,x+.003,S=>[thAtY(S,S.yb+T.trimH+.01),thAtY(S,S.yt-.012)],.0015,M.void,1,24));
+  T.doors.forEach(gap);
+  [[T.doors[0],T.doors[1]],[T.doors[1],T.doors[2]]].forEach(([d0,d1])=>{
+    const x=d1+.16,S=section(T,x),y=S.yt-.11,th=thAtY(S,y);ringPt(S,th,p);
+    both(g,()=>{const hm=new THREE.Mesh(new THREE.CapsuleGeometry(.011,.11,4,10),M.chrome);hm.rotation.z=Math.PI/2;hm.position.set(x,y,p.z+.006);hm.scale.z=.6;return hm;});
+  });
+  // Linha do capô
+  const hood=T.hood,hS=section(T,hood);
+  both(g,()=>decal(T,hood-.002,hood+.002,S=>[thAtY(S,S.yt-.05),Math.PI/2-.001],.0015,M.void,1,16));
+
   const pl=new THREE.Mesh(new THREE.BoxGeometry(.03,.15,.5),plateM);
   pl.position.set(T.plate[0],T.plate[1],0);g.add(pl);
   // Caçamba da picape e rack de teto do SUV
