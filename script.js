@@ -47,7 +47,9 @@ const DATA=[
   ["Câmbio e Embreagem","Passe todas as marchas e note trancos, patinação ou dificuldade de engate.","Em automáticos, observe a suavidade das trocas.","c"],
   ["Direção e Estabilidade","Em reta, solte levemente o volante e veja se o carro mantém a trajetória.","Vibração em velocidade pode indicar balanceamento ou suspensão.","i"],
   ["Painel e Luzes de Alerta","Ao dar a partida, as luzes de aviso acendem e devem apagar em poucos segundos.","Luz de airbag, ABS ou injeção que nem chega a acender pode ter sido desligada de propósito para esconder defeito.","c"],
-  ["Retomada e Aceleração","Em subida ou estrada, acelere com vontade e veja se o motor responde sem falhas ou engasgos.","Fumaça azul indica queima de óleo; fumaça preta, excesso de combustível.","i"]]}
+  ["Retomada e Aceleração","Em subida ou estrada, acelere com vontade e veja se o motor responde sem falhas ou engasgos.","Fumaça azul indica queima de óleo; fumaça preta, excesso de combustível.","i"],
+  ["Ruídos em Movimento","Com o rádio desligado, escute batidas na suspensão, zumbidos e chiados em curvas e lombadas.","Zumbido que aumenta com a velocidade costuma ser rolamento de roda.","i"],
+  ["Ar-Condicionado e Ventilação","Ligue o ar no máximo: ele deve gelar em poucos minutos, sem ruído nem cheiro ruim.","Ar que só gela com o carro em movimento pode indicar falta de gás ou problema no eletroventilador.","r"]]}
 ];
 const short=c=>c.n.replace(/^\d+\.\s*/,'');
 const $=id=>document.getElementById(id);
