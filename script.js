@@ -270,13 +270,92 @@ function reportStats(){
   return {items,done,pct:Math.round(done/items.length*100),c:by('c'),i:by('i'),r:by('r')};
 }
 function buildPrint(){
-  const all=state.flat(),pct=Math.round(all.filter(Boolean).length/all.length*100);
-  const esc=s=>String(s).replace(/[&<>"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
+  const st=reportStats(),now=new Date();
+  const date=now.toLocaleDateString('pt-BR'),time=now.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+  const id='CI-'+now.toISOString().slice(0,10).replace(/-/g,'')+'-'+(CI.plate||'0000').slice(-4).toUpperCase();
+  const critPend=st.c.n-st.c.ok;
+  const v=st.done===st.items.length?{cls:'ok',t:'Checagem concluída',d:`Todos os ${st.items.length} pontos foram verificados. Guarde este relatório junto com os documentos do veículo.`}
+    :critPend?{cls:'bad',t:`Atenção: ${critPend} ${critPend>1?'itens críticos pendentes':'item crítico pendente'}`,d:'Não feche negócio antes de conferir os itens críticos listados em "Pendências prioritárias". Eles envolvem procedência, documentação e segurança.'}
+    :{cls:'warn',t:'Checagem parcial',d:`Todos os itens críticos foram verificados, mas ainda ${st.items.length-st.done>1?'restam':'resta'} ${st.items.length-st.done} ${st.items.length-st.done>1?'pontos':'ponto'} a conferir antes da compra.`};
+  const colorName=(document.querySelector(`#colors [data-color="${CI.color}"]`)||{}).ariaLabel||'—';
+  let shot='';try{shot=window.Car3D&&Car3D.snapshot?Car3D.snapshot():'';}catch(e){}
+  const R=46,C=2*Math.PI*R;
+  const pending=st.items.filter(x=>!x.ok&&x.lv!=='r').sort((a,b)=>(a.lv==='c'?0:1)-(b.lv==='c'?0:1));
+  const chip=lv=>`<span class="rp-lv rp-lv-${lv}">${LEVEL[lv]}</span>`;
+  const kpi=(o,l)=>`<li><b>${o.ok}<small>/${o.n}</small></b><span>${l}</span><i style="--p:${o.n?o.ok/o.n*100:0}%"></i></li>`;
+
   $('printout').innerHTML=`
-   <h1>Relatório de checagem · ClearInspect</h1>
-   <p class="pmeta"><b>Modelo:</b> ${esc(CI.model||'Não informado')} &nbsp;·&nbsp; <b>Placa:</b> ${CI.plate?fmtPlate(CI.plate):'Não informada'} &nbsp;·&nbsp; <b>Data:</b> ${new Date().toLocaleDateString('pt-BR')} &nbsp;·&nbsp; <b>Avaliado:</b> ${pct}%</p>
-   ${DATA.map((c,k)=>`<h2>${c.n} <small>(${catDone(k)}/${c.items.length})</small></h2><ul>${
-     c.items.map((it,j)=>`<li class="${state[k][j]?'ok':''}"><span class="box">${state[k][j]?'✓':''}</span><div><b>${it[0]}</b><br>${it[1]}</div></li>`).join('')}</ul>`).join('')}`;
+  <div class="rp">
+   <header class="rp-head">
+    <div class="rp-brand"><span class="rp-mark">${RP_ICON.logo}</span><div><b>Clear<span>Inspect</span></b><small>Relatório de Inspeção Veicular</small></div></div>
+    <dl class="rp-id"><div><dt>Relatório</dt><dd>${id}</dd></div><div><dt>Emitido em</dt><dd>${date} · ${time}</dd></div></dl>
+   </header>
+
+   <section class="rp-hero">
+    <div class="rp-car">${shot?`<img src="${shot}" alt="">`:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 16v3M19 16v3M4 16h16v-5l-2-5H6l-2 5z"/><path d="M4 11h16"/></svg>`}</div>
+    <div class="rp-veh">
+     <span class="rp-kicker">Veículo inspecionado</span>
+     <h1>${esc(CI.model||'Modelo não informado')}</h1>
+     <div class="rp-plate"><span class="rp-plate-top">BRASIL</span><span class="rp-plate-n">${CI.plate?fmtPlate(CI.plate):'SEM PLACA'}</span></div>
+     <dl class="rp-specs">
+      <div><dt>Carroceria</dt><dd>${TYPE_NAME[CI.type]||'—'}</dd></div>
+      <div><dt>Cor</dt><dd>${esc(colorName)}</dd></div>
+      <div><dt>Data da checagem</dt><dd>${date}</dd></div>
+      <div><dt>Pontos verificados</dt><dd>${st.done} de ${st.items.length}</dd></div>
+     </dl>
+    </div>
+   </section>
+
+   <section class="rp-verdict rp-${v.cls}">
+    <div class="rp-score">
+     <svg viewBox="0 0 110 110"><circle cx="55" cy="55" r="${R}" class="bg"/><circle cx="55" cy="55" r="${R}" class="fg" stroke-dasharray="${C}" stroke-dashoffset="${C*(1-st.pct/100)}"/></svg>
+     <div><b>${st.pct}%</b><span>verificado</span></div>
+    </div>
+    <div class="rp-vtxt"><span class="rp-kicker">Parecer da checagem</span><h2>${v.t}</h2><p>${v.d}</p></div>
+   </section>
+   <ul class="rp-kpis">${kpi(st.c,'Itens críticos')}${kpi(st.i,'Itens importantes')}${kpi(st.r,'Itens recomendados')}</ul>
+
+   <section class="rp-block">
+    <h3 class="rp-h"><span>01</span>Resumo por etapa</h3>
+    <table class="rp-sum">
+     <thead><tr><th>Etapa</th><th>Progresso</th><th>Verificados</th><th>Críticos pendentes</th><th>Situação</th></tr></thead>
+     <tbody>${DATA.map((c,k)=>{
+       const d=catDone(k),n=c.items.length,p=Math.round(d/n*100),cp=c.items.filter((it,j)=>it[3]==='c'&&!state[k][j]).length;
+       const s=d===n?['ok','Concluída']:cp?['bad','Com pendência crítica']:d?['warn','Em andamento']:['none','Não iniciada'];
+       return `<tr><td><b>${c.n}</b></td><td><span class="rp-bar"><i style="width:${p}%"></i></span></td><td>${d}/${n}</td><td>${cp||'—'}</td><td><span class="rp-st rp-st-${s[0]}">${s[1]}</span></td></tr>`;
+     }).join('')}</tbody>
+    </table>
+   </section>
+
+   <section class="rp-block">
+    <h3 class="rp-h"><span>02</span>Pendências prioritárias</h3>
+    ${pending.length?`<ol class="rp-pend">${pending.slice(0,10).map(x=>`<li><div class="rp-pend-h">${chip(x.lv)}<b>${x.it[0]}</b><small>${short(DATA[x.k])}</small></div><p>${x.it[1]} <em>${x.it[2]}</em></p></li>`).join('')}</ol>${pending.length>10?`<p class="rp-more">+ ${pending.length-10} outros itens pendentes no checklist detalhado.</p>`:''}`
+      :`<p class="rp-empty">${RP_ICON.ok} Nenhum item crítico ou importante pendente.</p>`}
+   </section>
+
+   <section class="rp-block rp-detail">
+    <h3 class="rp-h"><span>03</span>Checklist detalhado</h3>
+    ${DATA.map((c,k)=>`<div class="rp-stage">
+      <div class="rp-stage-h"><b>${c.n}</b><span>${catDone(k)}/${c.items.length} verificados</span></div>
+      <table class="rp-items"><tbody>${c.items.map((it,j)=>`<tr class="${state[k][j]?'ok':''}">
+        <td class="rp-ic">${state[k][j]?RP_ICON.ok:RP_ICON.pend}</td>
+        <td><b>${it[0]}</b><p>${it[1]}</p><p class="rp-tip"><span>Como verificar:</span> ${it[2]}</p></td>
+        <td class="rp-meta">${chip(it[3])}<span class="rp-res">${state[k][j]?'Verificado':'Pendente'}</span></td></tr>`).join('')}</tbody></table>
+    </div>`).join('')}
+   </section>
+
+   <section class="rp-block rp-close">
+    <h3 class="rp-h"><span>04</span>Observações</h3>
+    <div class="rp-lines"><i></i><i></i><i></i><i></i><i></i></div>
+    <div class="rp-sign">
+     <div><i></i><span>Comprador</span></div>
+     <div><i></i><span>Vendedor</span></div>
+     <div><i></i><span>Local e data</span></div>
+    </div>
+    <p class="rp-legal">Este relatório registra a checagem feita pelo próprio comprador com o roteiro do ClearInspect. Ele é um guia de verificação e não substitui o laudo de vistoria cautelar, a consulta aos órgãos oficiais (Detran, Senatran) nem a avaliação de um mecânico de confiança.</p>
+   </section>
+   <footer class="rp-foot"><span>ClearInspect · ${id}</span><span>${esc(CI.model||'Veículo')} ${CI.plate?'· '+fmtPlate(CI.plate):''}</span></footer>
+  </div>`;
 }
 window.addEventListener('beforeprint',buildPrint);
 $('pdf').onclick=()=>{buildPrint();window.print();};
