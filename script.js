@@ -254,7 +254,21 @@ $('plateForm').addEventListener('submit',e=>{
 });
 if(CI.plate)plate.value=fmtPlate(CI.plate);
 
-// Relatório em PDF: monta uma versão com todas as etapas só para impressão
+// Relatório em PDF: documento próprio para impressão, com parecer, resumo e detalhes
+const TYPE_NAME={hatch:'Hatch',sedan:'Sedã',suv:'SUV',picape:'Picape'};
+const esc=s=>String(s).replace(/[&<>"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
+const RP_ICON={
+  ok:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg>',
+  pend:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="12" r="7"/></svg>',
+  logo:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 6v6c0 4.5 3.4 8.3 8 9 4.6-.7 8-4.5 8-9V6z"/><path d="m8.5 12 2.5 2.5 4.5-5"/></svg>'
+};
+function reportStats(){
+  const items=[];
+  DATA.forEach((c,k)=>c.items.forEach((it,j)=>items.push({k,j,it,ok:state[k][j],lv:it[3]})));
+  const by=lv=>{const a=items.filter(x=>x.lv===lv);return {ok:a.filter(x=>x.ok).length,n:a.length};};
+  const done=items.filter(x=>x.ok).length;
+  return {items,done,pct:Math.round(done/items.length*100),c:by('c'),i:by('i'),r:by('r')};
+}
 function buildPrint(){
   const all=state.flat(),pct=Math.round(all.filter(Boolean).length/all.length*100);
   const esc=s=>String(s).replace(/[&<>"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
