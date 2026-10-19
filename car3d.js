@@ -431,12 +431,39 @@ function buildCar(type){
   both(g,()=>decal(T,T.R,T.R+tl,(S,u)=>hlRange(S,1-u,.1,.15),.004,M.tail,20,8));
   both(g,()=>decal(T,T.R,T.R+tl*.85,S=>[thAtY(S,S.yt-.09),thAtY(S,S.yt-.078)],.0065,M.tailLed,18,2));
 
-  const pl=new THREE.Mesh(new THREE.BoxGeometry(.03,.15,.5),plateM);
-  pl.position.set(T.plate[0],T.plate[1],0);g.add(pl);
-  // Caçamba da picape e rack de teto do SUV
-  if(T.bed){
-    const bed=new THREE.Mesh(new THREE.BoxGeometry(T.bed[1]-T.bed[0],.03,W-.22),black);
-    bed.position.set((T.bed[0]+T.bed[1])/2,1.215,0);g.add(bed);
+  // 6) Frente: extensão dos faróis, grade, entrada de ar e placa
+  const SF=secs[secs.length-1],SR=secs[0],fx=T.F+.002,rx=T.R-.002;
+  const cW=SF.hw,yTop=SF.yt-.03,hlH=T.hl[1]-.03,big=T.trimH>.08;
+  // peça plana na frente a partir de pontos (z, y) do lado direito; espelhada para o esquerdo
+  const fshape=(pts,mat,off,mirror=true)=>{
+    const mk=()=>{const sh=new THREE.Shape(pts.map(p=>new THREE.Vector2(-p[0],p[1])));
+      const m=new THREE.Mesh(new THREE.ShapeGeometry(sh,8),mat);m.position.x=fx+off;m.rotation.y=Math.PI/2;return m;};
+    return mirror?both(g,mk):[g.add(mk())];
+  };
+  const hw0=Math.min(.32,cW*.42),zi=cW-hw0;                    // largura e borda interna do farol
+  // Farol: carcaça escura, assinatura de LED em "L", dois projetores e seta
+  fshape([[cW+.004,yTop],[zi+.02,yTop-.004],[zi,yTop-.02],[zi,yTop-hlH*.55],[zi+.03,yTop-hlH*.62],[cW+.004,yTop-hlH]],M.lamp,0);
+  fshape([[cW,yTop-.006],[zi+.02,yTop-.01],[zi+.012,yTop-.02],[cW,yTop-.016]],M.led,.0015);
+  fshape([[zi+.012,yTop-.02],[zi+.024,yTop-.02],[zi+.024,yTop-hlH*.5],[zi+.012,yTop-hlH*.5]],M.led,.0015);
+  [.36,.66].forEach(f=>both(g,()=>{
+    const gr=new THREE.Group(),z=lerp(zi,cW,f)+.01,y=yTop-hlH*.5;
+    const lens=new THREE.Mesh(new THREE.CircleGeometry(.024,24),M.lens);
+    const rim=new THREE.Mesh(new THREE.TorusGeometry(.027,.005,8,24),M.chrome);
+    gr.add(lens,rim);gr.position.set(fx+.003,y,z);gr.rotation.y=Math.PI/2;return gr;
+  }));
+  fshape([[cW-.01,yTop-hlH*.82],[cW-.08,yTop-hlH*.78],[cW-.08,yTop-hlH*.7],[cW-.01,yTop-hlH*.74]],M.amber,.0015);
+  // Grade superior entre os faróis
+  const gTop=yTop-.004,gBot=big?yTop-hlH*1.05:yTop-hlH*.6,gz=zi-.012;
+  hexTex.repeat.set(gz*12,(gTop-gBot)*12);
+  const gm=new THREE.MeshPhysicalMaterial({map:hexTex,roughness:.35,metalness:.4,clearcoat:.6});
+  fshape([[gz,gTop],[-gz,gTop],[-gz+.03,gBot],[gz-.03,gBot]],gm,0,false);
+  fshape([[gz,gTop+.004],[-gz,gTop+.004],[-gz,gTop-.008],[gz,gTop-.008]],big?M.chrome:M.gloss,.001,false);
+  if(big)[.33,.66].forEach(f=>fshape([[gz,lerp(gBot,gTop,f)+.006],[-gz,lerp(gBot,gTop,f)+.006],[-gz,lerp(gBot,gTop,f)-.006],[gz,lerp(gBot,gTop,f)-.006]],M.chrome,.001,false));
+  // Entrada de ar inferior, faróis de neblina e placa
+  const iTop=Math.min(gBot-.05,yTop-hlH-.03),iBot=SF.yb+T.trimH+.012,iz=cW*.72;
+  if(iTop-iBot>.04){
+    fshape([[iz,iTop],[-iz,iTop],[-iz-.04,iBot],[iz+.04,iBot]],gm,0,false);
+    both(g,()=>{const m=new THREE.Mesh(new THREE.CircleGeometry(.03,24),M.lens);m.position.set(fx+.002,iBot+(iTop-iBot)*.5,iz+.03);m.rotation.y=Math.PI/2;return m;});
   }
   if(T.rails)[-1,1].forEach(z=>{
     const rl=new THREE.Mesh(new THREE.BoxGeometry(r1-r0-.2,.04,.05),black);
