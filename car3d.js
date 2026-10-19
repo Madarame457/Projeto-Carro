@@ -224,7 +224,6 @@ function focus(k){
   const n=car.anchors[k].n;
   let target=Math.atan2(camera.position.x,camera.position.z)-Math.atan2(n.x,n.z);
   target+=(n.y>.5?-.5:.35); // vista 3/4 em vez de totalmente de frente
-  // Gira pelo caminho mais curto
   const d=((target-yawT)%(Math.PI*2)+Math.PI*3)%(Math.PI*2)-Math.PI;
   yawT+=d;pitchT=n.y>.5?.55:.28;idle=-5;
 }
@@ -262,7 +261,6 @@ new IntersectionObserver(es=>{visible=es[0].isIntersecting;}).observe(box);
 function loop(now){
   requestAnimationFrame(loop);
   const dt=Math.min(Math.max((now-lastT)/1000,0),.05);lastT=now;
-  if(!visible||!car)return;
   idle+=dt;
   if(!drag&&idle>4&&!reduce)yawT+=dt*.25;
   yaw+=(yawT-yaw)*Math.min(1,dt*6);

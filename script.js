@@ -7,27 +7,29 @@ const ICONS={
  check:'<path d="m5 12 5 5 9-10"/>'
 };
 const svg=(k,s=20)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${ICONS[k]}</svg>`;
+// Cada item: [título, o que verificar, dica, prioridade]  ·  prioridade: c = crítico, i = importante, r = recomendado
+const LEVEL={c:'Crítico',i:'Importante',r:'Recomendado'};
 const DATA=[
  {n:"1. Anúncio e Preço",t:"Checagem: Anúncio e Preço",i:"trend",items:[
-  ["Verificar Chassi (VIN) e Histórico","Verifique o número do chassi (VIN) em um serviço de histórico veicular confiável.","Confira se o chassi do anúncio bate com o do documento e com a gravação no veículo. Consulte leilão, sinistro, recall e restrições."],
-  ["Comparação de Valor de Mercado","Garanta que o preço pedido esteja alinhado com o valor de mercado atual (Tabela FIPE, Webmotors, KBB).","Compare com pelo menos três anúncios do mesmo modelo, ano e quilometragem. Preço muito abaixo da média merece desconfiança."],
-  ["Análise do Perfil do Vendedor","Verifique há quanto tempo ele possui o carro. Se for menos de um ano, pergunte o motivo da venda.","Prefira vendedores que apresentem notas de revisão e documentos em nome próprio."]]},
+  ["Verificar Chassi (VIN) e Histórico","Verifique o número do chassi (VIN) em um serviço de histórico veicular confiável.","Confira se o chassi do anúncio bate com o do documento e com a gravação no veículo. Consulte leilão, sinistro, recall e restrições.","c"],
+  ["Comparação de Valor de Mercado","Garanta que o preço pedido esteja alinhado com o valor de mercado atual (Tabela FIPE, Webmotors, KBB).","Compare com pelo menos três anúncios do mesmo modelo, ano e quilometragem. Preço muito abaixo da média merece desconfiança.","i"],
+  ["Análise do Perfil do Vendedor","Verifique há quanto tempo ele possui o carro. Se for menos de um ano, pergunte o motivo da venda.","Prefira vendedores que apresentem notas de revisão e documentos em nome próprio.","i"]]},
  {n:"2. Visual Externo",t:"Checagem: Visual Externo",i:"car",items:[
-  ["Alinhamento da Lataria","Observe frestas entre portas, capô e porta-malas: devem ter espessura uniforme.","Frestas irregulares podem indicar colisão e reparo mal feito."],
-  ["Diferenças de Pintura","Olhe a lataria em ângulo, sob luz natural, procurando variações de tom ou textura.","Pontos foscos, marcas de fita e respingos em borrachas indicam repintura."],
-  ["Pneus e Vidros","Verifique o desgaste dos pneus, a data de fabricação e trincas nos vidros.","Desgaste desigual pode apontar problemas de suspensão ou alinhamento."]]},
+  ["Alinhamento da Lataria","Observe frestas entre portas, capô e porta-malas: devem ter espessura uniforme.","Frestas irregulares podem indicar colisão e reparo mal feito.","i"],
+  ["Diferenças de Pintura","Olhe a lataria em ângulo, sob luz natural, procurando variações de tom ou textura.","Pontos foscos, marcas de fita e respingos em borrachas indicam repintura.","i"],
+  ["Pneus e Vidros","Verifique o desgaste dos pneus, a data de fabricação e trincas nos vidros.","Desgaste desigual pode apontar problemas de suspensão ou alinhamento.","i"]]},
  {n:"3. Checagem Mecânica",t:"Checagem: Mecânica",i:"sliders",items:[
-  ["Motor e Fluidos","Confira nível e cor do óleo, líquido de arrefecimento e vazamentos sob o carro.","Óleo muito escuro ou com aspecto leitoso é sinal de alerta."],
-  ["Suspensão e Freios","Teste freios em baixa velocidade e escute ruídos ao passar em buracos.","Puxões para um lado ou vibração no pedal exigem revisão."],
-  ["Scanner de Falhas","Use um scanner OBD-II para ler códigos de erro armazenados.","Luzes do painel apagadas com códigos ativos podem indicar fraude."]]},
+  ["Motor e Fluidos","Confira nível e cor do óleo, líquido de arrefecimento e vazamentos sob o carro.","Óleo muito escuro ou com aspecto leitoso é sinal de alerta.","c"],
+  ["Suspensão e Freios","Teste freios em baixa velocidade e escute ruídos ao passar em buracos.","Puxões para um lado ou vibração no pedal exigem revisão.","c"],
+  ["Scanner de Falhas","Use um scanner OBD-II para ler códigos de erro armazenados.","Luzes do painel apagadas com códigos ativos podem indicar fraude.","i"]]},
  {n:"4. Documentação",t:"Checagem: Documentação",i:"doc",items:[
-  ["CRLV e Licenciamento","Confirme que o licenciamento está em dia e sem multas ou débitos.","Consulte o Detran do estado para verificar pendências."],
-  ["Nome do Proprietário","O vendedor deve ser o proprietário registrado no documento.","Se for procurador, exija procuração válida e reconhecida em cartório."],
-  ["Recibo e Transferência","Formalize a venda com recibo e faça a transferência no prazo legal.","Registre a data e a quilometragem no recibo."]]},
+  ["CRLV e Licenciamento","Confirme que o licenciamento está em dia e sem multas ou débitos.","Consulte o Detran do estado para verificar pendências.","c"],
+  ["Nome do Proprietário","O vendedor deve ser o proprietário registrado no documento.","Se for procurador, exija procuração válida e reconhecida em cartório.","c"],
+  ["Recibo e Transferência","Formalize a venda pela ATPV-e (antigo recibo) e faça a transferência em até 30 dias.","Registre a data e a quilometragem. Enquanto a transferência não sair, multas e IPVA continuam no nome do antigo dono.","c"]]},
  {n:"5. Teste de Rodagem",t:"Checagem: Teste de Rodagem",i:"road",items:[
-  ["Partida e Marcha Lenta","Ligue o motor a frio e observe fumaça, ruídos e estabilidade da marcha lenta.","Motor frio revela problemas que o aquecido pode esconder."],
-  ["Câmbio e Embreagem","Passe todas as marchas e note trancos, patinação ou dificuldade de engate.","Em automáticos, observe a suavidade das trocas."],
-  ["Direção e Estabilidade","Em reta, solte levemente o volante e veja se o carro mantém a trajetória.","Vibração em velocidade pode indicar balanceamento ou suspensão."]]}
+  ["Partida e Marcha Lenta","Ligue o motor a frio e observe fumaça, ruídos e estabilidade da marcha lenta.","Motor frio revela problemas que o aquecido pode esconder.","i"],
+  ["Câmbio e Embreagem","Passe todas as marchas e note trancos, patinação ou dificuldade de engate.","Em automáticos, observe a suavidade das trocas.","c"],
+  ["Direção e Estabilidade","Em reta, solte levemente o volante e veja se o carro mantém a trajetória.","Vibração em velocidade pode indicar balanceamento ou suspensão.","i"]]}
 ];
 const short=c=>c.n.replace(/^\d+\.\s*/,'');
 const $=id=>document.getElementById(id);
@@ -63,7 +65,7 @@ function renderList(){
     <div class="card-h">
       <button class="chk" role="checkbox" aria-checked="${state[CI.cur][j]}" aria-label="Concluído: ${it[0]}"></button>
       <button class="card-open" aria-expanded="false">
-        <span class="txt"><h4>${it[0]}</h4><p>${it[1]}</p></span>
+        <span class="txt"><span class="lvl lvl-${it[3]}">${LEVEL[it[3]]}</span><h4>${it[0]}</h4><p>${it[1]}</p></span>
         <svg class="chev" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
       </button>
     </div>
