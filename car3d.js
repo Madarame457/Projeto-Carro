@@ -624,7 +624,23 @@ function loop(now){
 }
 
 setType(CI.type);
-window.Car3D={setType,setColor:c=>paint.color.set(c),focus};
-box.classList.add('ready');
+// Foto do carro para o relatório em PDF (fundo transparente, sem a plataforma azul)
+function snapshot(){
+  if(!car)return '';
+  const W=1400,Hh=720,pr=renderer.getPixelRatio();
+  disc.visible=ring.visible=false;
+  car.group.scale.set(1,1,1);car.group.position.y=0;
+  renderer.setPixelRatio(1);renderer.setSize(W,Hh,false);
+  camera.aspect=W/Hh;camera.updateProjectionMatrix();
+  const fov=camera.fov*Math.PI/180,d=car.len*.6/Math.tan(fov/2)/Math.min(camera.aspect,1.6),p=.17,ty=car.H*.4;
+  pivot.rotation.y=-.62;
+  camera.position.set(0,ty+Math.sin(p)*d,Math.cos(p)*d);camera.lookAt(0,ty,0);
+  pivot.updateMatrixWorld(true);renderer.render(scene,camera);
+  const url=renderer.domElement.toDataURL('image/png');
+  disc.visible=ring.visible=true;renderer.setPixelRatio(pr);resize();
+  return url;
+}
+window.Car3D={setType,setColor:c=>{M.paint.color.set(c);},focus,setPlate:t=>drawPlate(t),snapshot,
+  view:(y,p)=>{yaw=yawT=y;pitch=pitchT=p;idle=-1e9;if(car)frame(performance.now());}};
 requestAnimationFrame(loop);
 })();
