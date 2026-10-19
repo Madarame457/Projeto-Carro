@@ -239,6 +239,55 @@ function decal(T,x0,x1,thf,off,mat,nu=28,nv=8,yMax){
 }
 const both=(g,mk)=>{const a=mk(),b=mk();b.scale.z=-1;g.add(a,b);return [a,b];};
 
+/* ---------- Roda completa ---------- */
+const wheelCache={};
+function wheel(r){
+  if(wheelCache[r])return wheelCache[r].clone();
+  const w=new THREE.Group(),tw=r*.68,rr=r*.66,hw=tw/2;
+  // Pneu: perfil de revolução com ombro arredondado, flanco abaulado e sulcos
+  const prof=[[rr,-hw+.012],[rr+.012,-hw-.002],[r*.86,-hw-.006],[r-.022,-hw+.004],[r-.004,-hw+.022],[r,-hw+.04]];
+  const gro=[];for(let k=0;k<4;k++){const zc=lerp(-hw+.06,hw-.06,k/3);gro.push([r,zc-.012],[r-.007,zc-.008],[r-.007,zc+.008],[r,zc+.012]);}
+  const half=prof.concat(gro).concat(prof.slice().reverse().map(p=>[p[0],-p[1]]));
+  const tire=new THREE.Mesh(new THREE.LatheGeometry(half.map(p=>new THREE.Vector2(p[0],p[1])),72),M.tire);
+  tire.rotation.x=Math.PI/2;w.add(tire);
+  // Interior escuro (impede ver através da roda)
+  const back=new THREE.Mesh(new THREE.CircleGeometry(rr,40),M.void);back.position.z=-hw+.02;w.add(back);
+  const barrel=new THREE.Mesh(new THREE.CylinderGeometry(rr,rr,tw-.03,48,1,true),M.rimDark);
+  barrel.rotation.x=Math.PI/2;w.add(barrel);
+  // Disco e pinça de freio
+  const dsk=new THREE.Mesh(new THREE.CylinderGeometry(rr*.78,rr*.78,.022,48),M.disc);
+  dsk.rotation.x=Math.PI/2;dsk.position.z=hw-.1;w.add(dsk);
+  const hat=new THREE.Mesh(new THREE.CylinderGeometry(rr*.38,rr*.38,.03,32),M.rimDark);
+  hat.rotation.x=Math.PI/2;hat.position.z=hw-.095;w.add(hat);
+  const cal=new THREE.Mesh(new THREE.TorusGeometry(rr*.7,rr*.11,10,16,.9),M.caliper);
+  cal.position.z=hw-.075;cal.rotation.z=Math.PI*.62;cal.scale.z=2.2;w.add(cal);
+  // Face do aro: 5 pares de raios (furos recortados de um disco)
+  const ro=rr*.9,ri=rr*.34,sh=new THREE.Shape();sh.absarc(0,0,rr*.995,0,Math.PI*2,false);
+  const win=(a0,a1,rin,wO,wI)=>{
+    const p=new THREE.Path(),A0=a0+wO/ro,A1=a1-wO/ro,B0=a0+wI/rin,B1=a1-wI/rin;
+    p.moveTo(Math.cos(B0)*rin,Math.sin(B0)*rin);p.lineTo(Math.cos(A0)*ro,Math.sin(A0)*ro);
+    p.absarc(0,0,ro,A0,A1,false);p.lineTo(Math.cos(B1)*rin,Math.sin(B1)*rin);p.absarc(0,0,rin,B1,B0,true);
+    sh.holes.push(p);
+  };
+  for(let k=0;k<5;k++){
+    const a=k*Math.PI*2/5+Math.PI/2,dl=.15;
+    win(a-dl,a+dl,rr*.56,.012,.006);                 // fresta entre os raios gêmeos
+    win(a+dl,a+Math.PI*2/5-dl,ri,.014,.02);          // janela grande
+  }
+  const fg=new THREE.ExtrudeGeometry(sh,{depth:.02,bevelEnabled:true,bevelThickness:.008,bevelSize:.006,bevelSegments:3,curveSegments:40});
+  const face=new THREE.Mesh(fg,M.rim);face.position.z=hw-.05;w.add(face);
+  const lipG=new THREE.TorusGeometry(rr*.985,.009,8,64);
+  const lip=new THREE.Mesh(lipG,M.rim);lip.position.z=hw-.02;w.add(lip);
+  const cap=new THREE.Mesh(new THREE.CylinderGeometry(ri*.42,ri*.46,.03,32),M.rimDark);
+  cap.rotation.x=Math.PI/2;cap.position.z=hw-.015;w.add(cap);
+  for(let k=0;k<5;k++){
+    const a=k*Math.PI*2/5+Math.PI/2+Math.PI/5,n=new THREE.Mesh(new THREE.CylinderGeometry(.009,.009,.02,6),M.chrome);
+    n.rotation.x=Math.PI/2;n.position.set(Math.cos(a)*ri*.7,Math.sin(a)*ri*.7,hw-.02);w.add(n);
+  }
+  w.traverse(o=>{if(o.isMesh)o.castShadow=true;});
+  wheelCache[r]=w;return w.clone();
+}
+
 // Monta um carro e devolve também as âncoras dos pontos de checagem
 function buildCar(type){
   const T=TYPES[type],g=new THREE.Group(),ar=T.r+.08,W=T.W;
