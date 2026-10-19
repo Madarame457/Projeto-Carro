@@ -246,6 +246,7 @@ $('plateForm').addEventListener('submit',e=>{
     plate.focus();return;
   }
   CI.plate=p;save();renderSummary();
+  if(window.Car3D&&Car3D.setPlate)Car3D.setPlate(fmtPlate(p));
   msg.textContent=`Placa ${fmtPlate(p)} adicionada ao relatório.`;
   msg.classList.remove('err');
   toast(`Placa ${fmtPlate(p)} salva`);
@@ -272,6 +273,7 @@ $('reset').onclick=()=>{
   if(!confirm('Apagar todas as marcações, o modelo e a placa?'))return;
   state.forEach(a=>a.fill(false));
   CI.model=CI.plate='';q.value=plate.value='';
+  if(window.Car3D&&Car3D.setPlate)Car3D.setPlate('');
   save();select(0);toast('Checagem reiniciada');
 };
 
