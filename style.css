@@ -333,6 +333,32 @@ h4{margin:0 0 6px;font-size:18px;font-weight:600;letter-spacing:-.3px}
   .rp-specs dt{font-size:6.8pt;color:#7a8091;text-transform:uppercase;letter-spacing:.9px;font-weight:600}
   .rp-specs dd{margin-top:1px;font-weight:600}
 
+  .rp-verdict{--c:#2c449f;--c2:#1b2a63;display:flex;gap:18px;align-items:center;padding:15px 18px;border-radius:12px;border:1px solid;break-inside:avoid}
+  .rp-ok{--c:#16a34a;--c2:#166534;background:#effcf4;border-color:#b5ebc9}
+  .rp-warn{--c:#d99a00;--c2:#8a5a00;background:#fff9e8;border-color:#f3dc95}
+  .rp-bad{--c:#dc2626;--c2:#991b1b;background:#fff3f3;border-color:#f5bcbc}
+  .rp-score{position:relative;flex:none;width:90px;height:90px}
+  .rp-score svg{width:100%;height:100%;transform:rotate(-90deg)}
+  .rp-score circle{fill:none;stroke-width:9}
+  .rp-score .bg{stroke:rgba(20,24,33,.08)}
+  .rp-score .fg{stroke:var(--c);stroke-linecap:round}
+  .rp-score div{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+  .rp-score b{font-size:18pt;font-weight:800;letter-spacing:-.6px;line-height:1}
+  .rp-score span{margin-top:2px;font-size:6.5pt;color:#5b6273;text-transform:uppercase;letter-spacing:.8px;font-weight:600}
+  .rp-vtxt .rp-kicker{color:var(--c2)}
+  .rp-vtxt h2{margin:3px 0 4px;font-size:14pt;letter-spacing:-.4px;line-height:1.2;color:var(--c2)}
+  .rp-vtxt p{margin:0;color:#3a4050}
+
+  .rp-kpis{list-style:none;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:10px 0 0;padding:0}
+  .rp-kpis li{padding:10px 12px;border:1px solid #e3e6ee;border-radius:10px;break-inside:avoid}
+  .rp-kpis b{font-size:15pt;font-weight:800;letter-spacing:-.4px}
+  .rp-kpis small{font-size:9pt;color:#7a8091;font-weight:600}
+  .rp-kpis span{display:block;font-size:7.8pt;color:#5b6273}
+  .rp-kpis i{position:relative;display:block;height:4px;margin-top:7px;border-radius:4px;background:#e9ecf3;overflow:hidden}
+  .rp-kpis i::after{content:"";position:absolute;left:0;top:0;bottom:0;width:var(--p);background:#2c449f}
+  .rp-kpis li:nth-child(1) i::after{background:#dc2626}
+  .rp-kpis li:nth-child(2) i::after{background:#e0a100}
+
   .printout{display:block;font-family:Inter,Arial,sans-serif}
   .printout h1{font-size:22px;letter-spacing:-.5px;margin:0 0 6px;color:#111;background:none}
   .printout .pmeta{margin:0 0 18px;font-size:13px;color:#444}
