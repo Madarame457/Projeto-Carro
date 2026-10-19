@@ -295,9 +295,14 @@ h4{margin:0 0 6px;font-size:18px;font-weight:600;letter-spacing:-.3px}
   .nav-steps .btn{flex:1;font-size:14px;padding:0 10px}
 }
 
-/* Impressão: só o relatório */
+/* Relatório em PDF (impressão): documento A4 independente do tema escuro */
+@page{size:A4;margin:13mm 12mm 15mm;background:#fff;
+  @bottom-left{content:"ClearInspect · Relatório de Inspeção Veicular";font:7.5pt Inter,Arial,sans-serif;color:#8a90a0}
+  @bottom-right{content:"Página " counter(page) " de " counter(pages);font:7.5pt Inter,Arial,sans-serif;color:#8a90a0}
+}
 @media print{
-  body{background:#fff;color:#111;padding:0}
+  :root{color-scheme:light;background:#fff!important}
+  html,body{background:#fff!important;color:#141821;padding:0!important;margin:0!important;width:auto!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
   body>*:not(.printout){display:none!important}
   .printout{display:block;font-family:Inter,Arial,sans-serif}
   .printout h1{font-size:22px;letter-spacing:-.5px;margin:0 0 6px;color:#111;background:none}
