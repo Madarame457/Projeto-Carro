@@ -4,7 +4,7 @@
 (async()=>{
 const box=document.getElementById('viewer');
 const layer=document.getElementById('hotspots');
-const CI=window.CI||{cur:0,type:'sedan',color:'#2c449f'};
+const CI=window.CI||{cur:0,type:'sedan',color:'#2c449f',plate:''};
 const fail=()=>box.classList.add('no3d');
 let THREE;
 try{THREE=await import('https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.min.js');}
@@ -21,7 +21,11 @@ renderer.shadowMap.type=THREE.VSMShadowMap;
 box.prepend(renderer.domElement);
 
 const scene=new THREE.Scene();
-const camera=new THREE.PerspectiveCamera(28,1,.1,100);
+const camera=new THREE.PerspectiveCamera(26,1,.1,100);
+const {Vector3}=THREE;
+const clamp=(v,a,b)=>Math.min(b,Math.max(a,v));
+const lerp=(a,b,t)=>a+(b-a)*t;
+const sstep=(a,b,v)=>{const t=clamp((v-a)/(b-a),0,1);return t*t*(3-2*t);};
 
 /* ---------- Iluminação de estúdio (vira mapa de reflexo) ---------- */
 (function(){
