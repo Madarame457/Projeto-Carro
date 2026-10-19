@@ -165,23 +165,34 @@ function section(T,x){
   const yw=yb+(yt-yb)*.56;
   return {x,yb,yt,hw:Math.max(hw,.001),yw,clip,nt:T.nt,bed:T.bed!==undefined&&x<T.bed-.02&&x>T.R+.1};
 }
-function wheel(T){
-  const w=new THREE.Group(),r=T.r;
-  const t=new THREE.Mesh(new THREE.CylinderGeometry(r,r,.26,40),tire);
-  t.rotation.x=Math.PI/2;w.add(t);
-  const side=new THREE.Mesh(new THREE.TorusGeometry(r*.86,r*.13,12,40),tire);
-  side.position.z=.12;w.add(side);
-  const disc=new THREE.Mesh(new THREE.CylinderGeometry(r*.64,r*.64,.02,32),new THREE.MeshStandardMaterial({color:0x2a2e36,metalness:.6,roughness:.5}));
-  disc.rotation.x=Math.PI/2;disc.position.z=.1;w.add(disc);
-  for(let i=0;i<5;i++){
-    const sp=new THREE.Mesh(new THREE.BoxGeometry(r*1.18,r*.16,.04),rim);
-    sp.rotation.z=i*Math.PI*2/5;sp.position.z=.125;w.add(sp);
+// Ponto da seção no ângulo th (-PI/2 = fundo, 0 = lateral direita, PI/2 = topo)
+function ringPt(S,th,o){
+  const c=Math.cos(th),s=Math.sin(th);let y,z;
+  if(s>=0){
+    const e=2/S.nt,q=Math.pow(s,e);
+    y=S.yw+(S.yt-S.yw)*q;
+    // ombro com leve inclinação + vinco lateral (linha de caráter)
+    z=S.hw*Math.sign(c)*Math.pow(Math.abs(c),e)*(1-.05*q-.006*Math.exp(-(((q-.5)/.03)**2)));
+    if(S.bed){const k=sstep(S.hw-.05,S.hw-.11,Math.abs(z));y-=.045*k;}
+  }else{
+    const e=2/NB,q=Math.pow(-s,e);
+    y=S.yw-(S.yw-S.yb)*q;
+    z=S.hw*Math.sign(c)*Math.pow(Math.abs(c),e)*(1-.05*q);
   }
-  const lip=new THREE.Mesh(new THREE.TorusGeometry(r*.64,r*.05,8,40),rim);
-  lip.position.z=.125;w.add(lip);
-  const hub=new THREE.Mesh(new THREE.CylinderGeometry(r*.16,r*.16,.06,20),rim);
-  hub.rotation.x=Math.PI/2;hub.position.z=.13;w.add(hub);
-  return w;
+  if(y<S.clip)y=S.clip;                  // recorte da caixa de roda
+  o.y=y;o.z=z;return o;
+}
+// Ângulo do lado direito que corresponde a uma altura y (busca binária)
+function thAtY(S,y){
+  let a=-Math.PI/2,b=Math.PI/2;const p={};
+  for(let i=0;i<30;i++){const m=(a+b)/2;ringPt(S,m,p);if(p.y<y)a=m;else b=m;}
+  return (a+b)/2;
+}
+// Altura da superfície superior numa largura z
+function topYAtZ(S,z){
+  let a=0,b=Math.PI/2;const p={};
+  for(let i=0;i<24;i++){const m=(a+b)/2;ringPt(S,m,p);if(p.z>z)a=m;else b=m;}
+  return ringPt(S,(a+b)/2,p).y;
 }
 
 // Monta um carro e devolve também as âncoras dos pontos de checagem
