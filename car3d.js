@@ -421,6 +421,16 @@ function buildCar(type){
   const hood=T.hood,hS=section(T,hood);
   both(g,()=>decal(T,hood-.002,hood+.002,S=>[thAtY(S,S.yt-.05),Math.PI/2-.001],.0015,M.void,1,16));
 
+  // 5) Faróis (envolvem o canto dianteiro) e lanternas
+  const hl=Math.max(.3,T.rc[0]*1.5);
+  const hlRange=(S,u,h0,h1)=>[thAtY(S,S.yt-lerp(h0,h1,u)),thAtY(S,S.yt-.03)];
+  both(g,()=>decal(T,T.F-hl,T.F,(S,u)=>hlRange(S,u,T.hl[0],T.hl[1]),.004,M.lamp,24,8));
+  both(g,()=>decal(T,T.F-hl*.92,T.F,(S,u)=>{const a=thAtY(S,S.yt-.042),b=thAtY(S,S.yt-.032);return [a,b];},.0065,M.led,22,2));
+  both(g,()=>decal(T,T.F-hl*.92,T.F-hl*.68,S=>[thAtY(S,S.yt-.075),thAtY(S,S.yt-.055)],.006,M.amber,6,2));
+  const tl=Math.max(.24,T.rc[1]*1.3);
+  both(g,()=>decal(T,T.R,T.R+tl,(S,u)=>hlRange(S,1-u,.1,.15),.004,M.tail,20,8));
+  both(g,()=>decal(T,T.R,T.R+tl*.85,S=>[thAtY(S,S.yt-.09),thAtY(S,S.yt-.078)],.0065,M.tailLed,18,2));
+
   const pl=new THREE.Mesh(new THREE.BoxGeometry(.03,.15,.5),plateM);
   pl.position.set(T.plate[0],T.plate[1],0);g.add(pl);
   // Caçamba da picape e rack de teto do SUV
