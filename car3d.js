@@ -102,10 +102,24 @@ const M={
   amber:new THREE.MeshStandardMaterial({color:0xffa640,emissive:0xff8a1a,emissiveIntensity:.9})
 };
 
-function extrude(shape,depth,bevel){
-  const g=new THREE.ExtrudeGeometry(shape,{depth:depth-bevel*2,bevelEnabled:true,bevelThickness:bevel,bevelSize:bevel*.8,bevelSegments:5,curveSegments:24});
-  g.translate(0,0,-(depth-bevel*2)/2);
-  return g;
+/* ---------- Matemática dos perfis ---------- */
+// Interpolação cúbica monotônica (sem "ondas" entre os pontos de controle)
+function curve(pts){
+  const n=pts.length,X=pts.map(p=>p[0]),Y=pts.map(p=>p[1]),d=[],m=[];
+  for(let i=0;i<n-1;i++)d[i]=(Y[i+1]-Y[i])/(X[i+1]-X[i]);
+  m[0]=d[0];m[n-1]=d[n-2];
+  for(let i=1;i<n-1;i++)m[i]=d[i-1]*d[i]<=0?0:(d[i-1]+d[i])/2;
+  for(let i=0;i<n-1;i++){
+    if(d[i]===0){m[i]=m[i+1]=0;continue;}
+    const a=m[i]/d[i],b=m[i+1]/d[i],s=a*a+b*b;
+    if(s>9){const t=3/Math.sqrt(s);m[i]=t*a*d[i];m[i+1]=t*b*d[i];}
+  }
+  return x=>{
+    if(x<=X[0])return Y[0];if(x>=X[n-1])return Y[n-1];
+    let i=0;while(x>X[i+1])i++;
+    const h=X[i+1]-X[i],t=(x-X[i])/h,t2=t*t,t3=t2*t;
+    return (2*t3-3*t2+1)*Y[i]+(t3-2*t2+t)*h*m[i]+(-2*t3+3*t2)*Y[i+1]+(t3-t2)*h*m[i+1];
+  };
 }
 function path(start,segs){
   const s=new THREE.Shape();s.moveTo(start[0],start[1]);
