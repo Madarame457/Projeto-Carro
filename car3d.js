@@ -15,7 +15,9 @@ try{renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});}
 catch(e){fail();return;}
 renderer.setPixelRatio(Math.min(devicePixelRatio,2));
 renderer.toneMapping=THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure=1.05;
+renderer.toneMappingExposure=1.0;
+renderer.shadowMap.enabled=true;
+renderer.shadowMap.type=THREE.VSMShadowMap;
 box.prepend(renderer.domElement);
 
 const scene=new THREE.Scene();
@@ -48,27 +50,32 @@ const camera=new THREE.PerspectiveCamera(28,1,.1,100);
   scene.environment=pm.fromScene(env,.02).texture;
   pm.dispose();
 })();
-const sun=new THREE.DirectionalLight(0xffffff,1.4);
-sun.position.set(4,8,5);
-scene.add(sun,new THREE.HemisphereLight(0xbfd2ff,0x0a0c11,.5));
+const sun=new THREE.DirectionalLight(0xffffff,1.1);
+sun.position.set(1.5,9,2.5);
+sun.castShadow=true;
+Object.assign(sun.shadow.camera,{left:-4.5,right:4.5,top:4.5,bottom:-4.5,near:1,far:20});
+sun.shadow.mapSize.set(2048,2048);sun.shadow.radius=9;sun.shadow.blurSamples=24;sun.shadow.bias=-.0004;
+scene.add(sun,new THREE.HemisphereLight(0xc8d6ff,0x090a0e,.35));
 
-// Chão: sombra suave + anel de "plataforma"
+// Chão: sombra projetada + oclusão suave + plataforma
 function radialTex(stops){
-  const c=document.createElement('canvas');c.width=c.height=256;
-  const g=c.getContext('2d'),gr=g.createRadialGradient(128,128,0,128,128,128);
+  const cv=document.createElement('canvas');cv.width=cv.height=256;
+  const g=cv.getContext('2d'),gr=g.createRadialGradient(128,128,0,128,128,128);
   stops.forEach(s=>gr.addColorStop(s[0],s[1]));
   g.fillStyle=gr;g.fillRect(0,0,256,256);
-  const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;return t;
+  const t=new THREE.CanvasTexture(cv);t.colorSpace=THREE.SRGBColorSpace;return t;
 }
-const shadow=new THREE.Mesh(new THREE.PlaneGeometry(1,1),new THREE.MeshBasicMaterial({
-  map:radialTex([[0,'rgba(0,0,0,.85)'],[.5,'rgba(0,0,0,.55)'],[1,'rgba(0,0,0,0)']]),transparent:true,depthWrite:false}));
-shadow.rotation.x=-Math.PI/2;shadow.position.y=.002;
-const disc=new THREE.Mesh(new THREE.CircleGeometry(3.2,96),new THREE.MeshBasicMaterial({
-  map:radialTex([[0,'rgba(44,68,159,.35)'],[.7,'rgba(44,68,159,.12)'],[1,'rgba(44,68,159,0)']]),transparent:true,depthWrite:false}));
-disc.rotation.x=-Math.PI/2;
-const ring=new THREE.Mesh(new THREE.RingGeometry(2.8,2.825,128),new THREE.MeshBasicMaterial({color:0x5b7bff,transparent:true,opacity:.45}));
+const ground=new THREE.Mesh(new THREE.PlaneGeometry(14,14),new THREE.ShadowMaterial({opacity:.55}));
+ground.rotation.x=-Math.PI/2;ground.receiveShadow=true;
+const ao=new THREE.Mesh(new THREE.PlaneGeometry(1,1),new THREE.MeshBasicMaterial({
+  map:radialTex([[0,'rgba(0,0,0,.9)'],[.55,'rgba(0,0,0,.6)'],[1,'rgba(0,0,0,0)']]),transparent:true,depthWrite:false}));
+ao.rotation.x=-Math.PI/2;ao.position.y=.003;
+const disc=new THREE.Mesh(new THREE.CircleGeometry(3.6,96),new THREE.MeshBasicMaterial({
+  map:radialTex([[0,'rgba(60,90,200,.28)'],[.7,'rgba(44,68,159,.10)'],[1,'rgba(44,68,159,0)']]),transparent:true,depthWrite:false}));
+disc.rotation.x=-Math.PI/2;disc.position.y=-.002;
+const ring=new THREE.Mesh(new THREE.RingGeometry(3.15,3.17,160),new THREE.MeshBasicMaterial({color:0x5b7bff,transparent:true,opacity:.35}));
 ring.rotation.x=-Math.PI/2;ring.position.y=.001;
-scene.add(disc,ring);
+scene.add(disc,ring,ground);
 
 // Materiais compartilhados
 const paint=new THREE.MeshPhysicalMaterial({color:CI.color,metalness:.45,roughness:.35,clearcoat:1,clearcoatRoughness:.06});
@@ -202,9 +209,8 @@ function buildCar(type){
   ]};
 }
 
-// Troca de carroceria com pequena animação de entrada
-const pivot=new THREE.Group();scene.add(pivot);
-pivot.add(shadow);
+/* ---------- Troca de carroceria com pequena animação ---------- */
+const pivot=new THREE.Group();scene.add(pivot);pivot.add(ao);
 let car=null,pop=1,dist=10;
 function setType(t){
   if(!TYPES[t])return;
