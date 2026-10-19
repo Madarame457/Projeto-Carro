@@ -7,28 +7,51 @@ const ICONS={
  check:'<path d="m5 12 5 5 9-10"/>'
 };
 const svg=(k,s=20)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${ICONS[k]}</svg>`;
+// Cada item: [título, o que verificar, dica, prioridade]  ·  prioridade: c = crítico, i = importante, r = recomendado
+const LEVEL={c:'Crítico',i:'Importante',r:'Recomendado'};
 const DATA=[
  {n:"1. Anúncio e Preço",t:"Checagem: Anúncio e Preço",i:"trend",items:[
-  ["Verificar Chassi (VIN) e Histórico","Verifique o número do chassi (VIN) em um serviço de histórico veicular confiável.","Confira se o chassi do anúncio bate com o do documento e com a gravação no veículo. Consulte leilão, sinistro, recall e restrições."],
-  ["Comparação de Valor de Mercado","Garanta que o preço pedido esteja alinhado com o valor de mercado atual (Tabela FIPE, Webmotors, KBB).","Compare com pelo menos três anúncios do mesmo modelo, ano e quilometragem. Preço muito abaixo da média merece desconfiança."],
-  ["Análise do Perfil do Vendedor","Verifique há quanto tempo ele possui o carro. Se for menos de um ano, pergunte o motivo da venda.","Prefira vendedores que apresentem notas de revisão e documentos em nome próprio."]]},
+  ["Verificar Chassi (VIN) e Histórico","Verifique o número do chassi (VIN) em um serviço de histórico veicular confiável.","Confira se o chassi do anúncio bate com o do documento e com a gravação no veículo. Consulte leilão, sinistro, recall e restrições.","c"],
+  ["Comparação de Valor de Mercado","Garanta que o preço pedido esteja alinhado com o valor de mercado atual (Tabela FIPE, Webmotors, KBB).","Compare com pelo menos três anúncios do mesmo modelo, ano e quilometragem. Preço muito abaixo da média merece desconfiança.","i"],
+  ["Análise do Perfil do Vendedor","Verifique há quanto tempo ele possui o carro. Se for menos de um ano, pergunte o motivo da venda.","Prefira vendedores que apresentem notas de revisão e documentos em nome próprio.","i"],
+  ["Fotos e Descrição do Anúncio","Compare as fotos com o carro ao vivo: cor, rodas, acessórios, versão e quilometragem devem bater.","Fotos só de longe, com placa escondida ou tiradas na chuva pedem cautela. Faça uma busca reversa da imagem para ver se ela não foi copiada de outro anúncio.","i"],
+  ["Quilometragem Compatível","A média brasileira fica entre 12 e 15 mil km por ano. O desgaste de volante, pedais e bancos deve condizer com o hodômetro.","Hodômetro baixo com volante liso, pedais gastos e banco do motorista afundado indica possível adulteração.","c"],
+  ["Histórico de Manutenção","Peça o manual com as revisões carimbadas e as notas fiscais dos serviços feitos.","Revisões na concessionária ou em oficina com nota fiscal ajudam a comprovar a quilometragem real e o cuidado do dono anterior.","i"],
+  ["Negociação e Pagamento Seguro","Nunca pague sinal antes de ver o carro e o documento. Transfira apenas para a conta do proprietário registrado.","No golpe do falso intermediário, o dinheiro vai para um terceiro. Confirme que o nome da conta é o mesmo do documento.","c"]]},
  {n:"2. Visual Externo",t:"Checagem: Visual Externo",i:"car",items:[
-  ["Alinhamento da Lataria","Observe frestas entre portas, capô e porta-malas: devem ter espessura uniforme.","Frestas irregulares podem indicar colisão e reparo mal feito."],
-  ["Diferenças de Pintura","Olhe a lataria em ângulo, sob luz natural, procurando variações de tom ou textura.","Pontos foscos, marcas de fita e respingos em borrachas indicam repintura."],
-  ["Pneus e Vidros","Verifique o desgaste dos pneus, a data de fabricação e trincas nos vidros.","Desgaste desigual pode apontar problemas de suspensão ou alinhamento."]]},
+  ["Alinhamento da Lataria","Observe frestas entre portas, capô e porta-malas: devem ter espessura uniforme.","Frestas irregulares podem indicar colisão e reparo mal feito.","i"],
+  ["Diferenças de Pintura","Olhe a lataria em ângulo, sob luz natural, procurando variações de tom ou textura.","Pontos foscos, marcas de fita e respingos em borrachas indicam repintura.","i"],
+  ["Pneus e Vidros","Verifique o desgaste dos pneus, a data de fabricação e trincas nos vidros.","Desgaste desigual pode apontar problemas de suspensão ou alinhamento.","i"],
+  ["Estrutura e Longarinas","Abra capô e porta-malas e procure soldas, longarinas amassadas e parafusos com a tinta riscada.","Parafusos de para-lamas e dobradiças sem tinta mostram que a peça foi removida. Estrutura reparada desvaloriza o carro e compromete a segurança.","c"],
+  ["Gravações nos Vidros e Etiquetas","Confira se o final do chassi gravado nos vidros e nas etiquetas (porta, coluna, motor) é o mesmo do documento.","Vidro sem gravação ou com marca diferente indica troca: pergunte o motivo. Etiqueta raspada ou ausente é sinal de alerta.","c"],
+  ["Ferrugem e Corrosão","Inspecione caixas de roda, soleiras, parte inferior das portas, porta-malas e assoalho.","Bolhas na pintura costumam esconder ferrugem por baixo. Carros de cidades litorâneas merecem atenção extra.","i"],
+  ["Faróis, Lanternas e Setas","Teste farol baixo e alto, luz de freio, ré, pisca e neblina. Observe se as lentes estão foscas ou com umidade.","Um farol muito mais novo que o outro pode indicar batida na dianteira.","r"]]},
  {n:"3. Checagem Mecânica",t:"Checagem: Mecânica",i:"sliders",items:[
-  ["Motor e Fluidos","Confira nível e cor do óleo, líquido de arrefecimento e vazamentos sob o carro.","Óleo muito escuro ou com aspecto leitoso é sinal de alerta."],
-  ["Suspensão e Freios","Teste freios em baixa velocidade e escute ruídos ao passar em buracos.","Puxões para um lado ou vibração no pedal exigem revisão."],
-  ["Scanner de Falhas","Use um scanner OBD-II para ler códigos de erro armazenados.","Luzes do painel apagadas com códigos ativos podem indicar fraude."]]},
+  ["Motor e Fluidos","Confira nível e cor do óleo, líquido de arrefecimento e vazamentos sob o carro.","Óleo muito escuro ou com aspecto leitoso é sinal de alerta.","c"],
+  ["Suspensão e Freios","Teste freios em baixa velocidade e escute ruídos ao passar em buracos.","Puxões para um lado ou vibração no pedal exigem revisão.","c"],
+  ["Scanner de Falhas","Use um scanner OBD-II para ler códigos de erro armazenados.","Luzes do painel apagadas com códigos ativos podem indicar fraude.","i"],
+  ["Arrefecimento e Superaquecimento","O reservatório deve estar limpo, sem óleo boiando, e o ponteiro de temperatura estável.","Óleo no líquido de arrefecimento ou água no óleo pode indicar junta do cabeçote queimada, um reparo caro.","c"],
+  ["Correia Dentada e Acessórios","Pergunte quando foi a última troca da correia dentada e veja o estado das correias auxiliares.","Correia vencida pode romper e danificar o motor. Peça a nota fiscal da troca.","i"],
+  ["Embaixo do Carro","Com uma lanterna, procure vazamentos, escapamento furado, coxins rachados e amortecedores com óleo.","Se possível, peça para erguer o carro em um elevador de oficina.","i"],
+  ["Bateria e Parte Elétrica","Teste vidros, travas, retrovisores, multimídia, buzina e limpadores. Veja a data da bateria.","Bateria com terminais esverdeados (zinabre) ou mais de três anos de uso pode precisar de troca em breve.","r"]]},
  {n:"4. Documentação",t:"Checagem: Documentação",i:"doc",items:[
-  ["CRLV e Licenciamento","Confirme que o licenciamento está em dia e sem multas ou débitos.","Consulte o Detran do estado para verificar pendências."],
-  ["Nome do Proprietário","O vendedor deve ser o proprietário registrado no documento.","Se for procurador, exija procuração válida e reconhecida em cartório."],
-  ["Recibo e Transferência","Formalize a venda com recibo e faça a transferência no prazo legal.","Registre a data e a quilometragem no recibo."]]},
+  ["CRLV e Licenciamento","Confirme que o licenciamento está em dia e sem multas ou débitos.","Consulte o Detran do estado para verificar pendências.","c"],
+  ["Nome do Proprietário","O vendedor deve ser o proprietário registrado no documento.","Se for procurador, exija procuração válida e reconhecida em cartório.","c"],
+  ["Recibo e Transferência","Formalize a venda pela ATPV-e (antigo recibo) e faça a transferência em até 30 dias.","Registre a data e a quilometragem. Enquanto a transferência não sair, multas e IPVA continuam no nome do antigo dono.","c"],
+  ["Gravame e Restrições","Consulte se há alienação fiduciária (financiamento), bloqueio judicial ou registro de roubo e furto.","Carro financiado só pode ser transferido depois da quitação e da baixa do gravame pelo banco.","c"],
+  ["Laudo de Vistoria Cautelar","Faça uma vistoria cautelar em uma empresa credenciada antes de pagar.","O laudo aponta repintura, chassi remarcado e estrutura comprometida. O custo é pequeno perto do risco.","i"],
+  ["Recall Atendido","Consulte pelo chassi, no site da montadora ou no Portal Senatran, se há recall pendente.","Recall é gratuito em qualquer concessionária da marca, mesmo para o segundo dono.","i"],
+  ["Chave Reserva, Manual e Itens Obrigatórios","Confirme chave reserva, manual, estepe, macaco, chave de roda e triângulo.","Chave reserva codificada custa caro. Se estiver faltando, use isso na negociação.","r"]]},
  {n:"5. Teste de Rodagem",t:"Checagem: Teste de Rodagem",i:"road",items:[
-  ["Partida e Marcha Lenta","Ligue o motor a frio e observe fumaça, ruídos e estabilidade da marcha lenta.","Motor frio revela problemas que o aquecido pode esconder."],
-  ["Câmbio e Embreagem","Passe todas as marchas e note trancos, patinação ou dificuldade de engate.","Em automáticos, observe a suavidade das trocas."],
-  ["Direção e Estabilidade","Em reta, solte levemente o volante e veja se o carro mantém a trajetória.","Vibração em velocidade pode indicar balanceamento ou suspensão."]]}
+  ["Partida e Marcha Lenta","Ligue o motor a frio e observe fumaça, ruídos e estabilidade da marcha lenta.","Motor frio revela problemas que o aquecido pode esconder.","i"],
+  ["Câmbio e Embreagem","Passe todas as marchas e note trancos, patinação ou dificuldade de engate.","Em automáticos, observe a suavidade das trocas.","c"],
+  ["Direção e Estabilidade","Em reta, solte levemente o volante e veja se o carro mantém a trajetória.","Vibração em velocidade pode indicar balanceamento ou suspensão.","i"],
+  ["Painel e Luzes de Alerta","Ao dar a partida, as luzes de aviso acendem e devem apagar em poucos segundos.","Luz de airbag, ABS ou injeção que nem chega a acender pode ter sido desligada de propósito para esconder defeito.","c"],
+  ["Retomada e Aceleração","Em subida ou estrada, acelere com vontade e veja se o motor responde sem falhas ou engasgos.","Fumaça azul indica queima de óleo; fumaça preta, excesso de combustível.","i"],
+  ["Ruídos em Movimento","Com o rádio desligado, escute batidas na suspensão, zumbidos e chiados em curvas e lombadas.","Zumbido que aumenta com a velocidade costuma ser rolamento de roda.","i"],
+  ["Ar-Condicionado e Ventilação","Ligue o ar no máximo: ele deve gelar em poucos minutos, sem ruído nem cheiro ruim.","Ar que só gela com o carro em movimento pode indicar falta de gás ou problema no eletroventilador.","r"]]}
 ];
+const TOTAL=DATA.reduce((n,c)=>n+c.items.length,0);
 const short=c=>c.n.replace(/^\d+\.\s*/,'');
 const $=id=>document.getElementById(id);
 
@@ -63,7 +86,7 @@ function renderList(){
     <div class="card-h">
       <button class="chk" role="checkbox" aria-checked="${state[CI.cur][j]}" aria-label="Concluído: ${it[0]}"></button>
       <button class="card-open" aria-expanded="false">
-        <span class="txt"><h4>${it[0]}</h4><p>${it[1]}</p></span>
+        <span class="txt"><span class="lvl lvl-${it[3]}">${LEVEL[it[3]]}</span><h4>${it[0]}</h4><p>${it[1]}</p></span>
         <svg class="chev" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
       </button>
     </div>
@@ -223,6 +246,7 @@ $('plateForm').addEventListener('submit',e=>{
     plate.focus();return;
   }
   CI.plate=p;save();renderSummary();
+  if(window.Car3D&&Car3D.setPlate)Car3D.setPlate(fmtPlate(p));
   msg.textContent=`Placa ${fmtPlate(p)} adicionada ao relatório.`;
   msg.classList.remove('err');
   toast(`Placa ${fmtPlate(p)} salva`);
@@ -230,15 +254,108 @@ $('plateForm').addEventListener('submit',e=>{
 });
 if(CI.plate)plate.value=fmtPlate(CI.plate);
 
-// Relatório em PDF: monta uma versão com todas as etapas só para impressão
+// Relatório em PDF: documento próprio para impressão, com parecer, resumo e detalhes
+const TYPE_NAME={hatch:'Hatch',sedan:'Sedã',suv:'SUV',picape:'Picape'};
+const esc=s=>String(s).replace(/[&<>"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
+const RP_ICON={
+  ok:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg>',
+  pend:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="12" r="7"/></svg>',
+  logo:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 6v6c0 4.5 3.4 8.3 8 9 4.6-.7 8-4.5 8-9V6z"/><path d="m8.5 12 2.5 2.5 4.5-5"/></svg>'
+};
+function reportStats(){
+  const items=[];
+  DATA.forEach((c,k)=>c.items.forEach((it,j)=>items.push({k,j,it,ok:state[k][j],lv:it[3]})));
+  const by=lv=>{const a=items.filter(x=>x.lv===lv);return {ok:a.filter(x=>x.ok).length,n:a.length};};
+  const done=items.filter(x=>x.ok).length;
+  return {items,done,pct:Math.round(done/items.length*100),c:by('c'),i:by('i'),r:by('r')};
+}
 function buildPrint(){
-  const all=state.flat(),pct=Math.round(all.filter(Boolean).length/all.length*100);
-  const esc=s=>String(s).replace(/[&<>"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
+  const st=reportStats(),now=new Date();
+  const date=now.toLocaleDateString('pt-BR'),time=now.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+  const id='CI-'+now.toISOString().slice(0,10).replace(/-/g,'')+'-'+(CI.plate||'0000').slice(-4).toUpperCase();
+  const critPend=st.c.n-st.c.ok;
+  const v=st.done===st.items.length?{cls:'ok',t:'Checagem concluída',d:`Todos os ${st.items.length} pontos foram verificados. Guarde este relatório junto com os documentos do veículo.`}
+    :critPend?{cls:'bad',t:`Atenção: ${critPend} ${critPend>1?'itens críticos pendentes':'item crítico pendente'}`,d:'Não feche negócio antes de conferir os itens críticos listados em "Pendências prioritárias". Eles envolvem procedência, documentação e segurança.'}
+    :{cls:'warn',t:'Checagem parcial',d:`Todos os itens críticos foram verificados, mas ainda ${st.items.length-st.done>1?'restam':'resta'} ${st.items.length-st.done} ${st.items.length-st.done>1?'pontos':'ponto'} a conferir antes da compra.`};
+  const colorName=(document.querySelector(`#colors [data-color="${CI.color}"]`)||{}).ariaLabel||'—';
+  let shot='';try{shot=window.Car3D&&Car3D.snapshot?Car3D.snapshot():'';}catch(e){}
+  const R=46,C=2*Math.PI*R;
+  const pending=st.items.filter(x=>!x.ok&&x.lv!=='r').sort((a,b)=>(a.lv==='c'?0:1)-(b.lv==='c'?0:1));
+  const chip=lv=>`<span class="rp-lv rp-lv-${lv}">${LEVEL[lv]}</span>`;
+  const kpi=(o,l)=>`<li><b>${o.ok}<small>/${o.n}</small></b><span>${l}</span><i style="--p:${o.n?o.ok/o.n*100:0}%"></i></li>`;
+
   $('printout').innerHTML=`
-   <h1>Relatório de checagem · ClearInspect</h1>
-   <p class="pmeta"><b>Modelo:</b> ${esc(CI.model||'Não informado')} &nbsp;·&nbsp; <b>Placa:</b> ${CI.plate?fmtPlate(CI.plate):'Não informada'} &nbsp;·&nbsp; <b>Data:</b> ${new Date().toLocaleDateString('pt-BR')} &nbsp;·&nbsp; <b>Avaliado:</b> ${pct}%</p>
-   ${DATA.map((c,k)=>`<h2>${c.n} <small>(${catDone(k)}/${c.items.length})</small></h2><ul>${
-     c.items.map((it,j)=>`<li class="${state[k][j]?'ok':''}"><span class="box">${state[k][j]?'✓':''}</span><div><b>${it[0]}</b><br>${it[1]}</div></li>`).join('')}</ul>`).join('')}`;
+  <div class="rp">
+   <header class="rp-head">
+    <div class="rp-brand"><span class="rp-mark">${RP_ICON.logo}</span><div><b>Clear<span>Inspect</span></b><small>Relatório de Inspeção Veicular</small></div></div>
+    <dl class="rp-id"><div><dt>Relatório</dt><dd>${id}</dd></div><div><dt>Emitido em</dt><dd>${date} · ${time}</dd></div></dl>
+   </header>
+
+   <section class="rp-hero">
+    <div class="rp-car">${shot?`<img src="${shot}" alt="">`:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 16v3M19 16v3M4 16h16v-5l-2-5H6l-2 5z"/><path d="M4 11h16"/></svg>`}</div>
+    <div class="rp-veh">
+     <span class="rp-kicker">Veículo inspecionado</span>
+     <h1>${esc(CI.model||'Modelo não informado')}</h1>
+     <div class="rp-plate"><span class="rp-plate-top">BRASIL</span><span class="rp-plate-n">${CI.plate?fmtPlate(CI.plate):'SEM PLACA'}</span></div>
+     <dl class="rp-specs">
+      <div><dt>Carroceria</dt><dd>${TYPE_NAME[CI.type]||'—'}</dd></div>
+      <div><dt>Cor</dt><dd>${esc(colorName)}</dd></div>
+      <div><dt>Data da checagem</dt><dd>${date}</dd></div>
+      <div><dt>Pontos verificados</dt><dd>${st.done} de ${st.items.length}</dd></div>
+     </dl>
+    </div>
+   </section>
+
+   <section class="rp-verdict rp-${v.cls}">
+    <div class="rp-score">
+     <svg viewBox="0 0 110 110"><circle cx="55" cy="55" r="${R}" class="bg"/><circle cx="55" cy="55" r="${R}" class="fg" stroke-dasharray="${C}" stroke-dashoffset="${C*(1-st.pct/100)}"/></svg>
+     <div><b>${st.pct}%</b><span>verificado</span></div>
+    </div>
+    <div class="rp-vtxt"><span class="rp-kicker">Parecer da checagem</span><h2>${v.t}</h2><p>${v.d}</p></div>
+   </section>
+   <ul class="rp-kpis">${kpi(st.c,'Itens críticos')}${kpi(st.i,'Itens importantes')}${kpi(st.r,'Itens recomendados')}</ul>
+
+   <section class="rp-block">
+    <h3 class="rp-h"><span>01</span>Resumo por etapa</h3>
+    <table class="rp-sum">
+     <thead><tr><th>Etapa</th><th>Progresso</th><th>Verificados</th><th>Críticos pendentes</th><th>Situação</th></tr></thead>
+     <tbody>${DATA.map((c,k)=>{
+       const d=catDone(k),n=c.items.length,p=Math.round(d/n*100),cp=c.items.filter((it,j)=>it[3]==='c'&&!state[k][j]).length;
+       const s=d===n?['ok','Concluída']:cp?['bad','Com pendência crítica']:d?['warn','Em andamento']:['none','Não iniciada'];
+       return `<tr><td><b>${c.n}</b></td><td><span class="rp-bar"><i style="width:${p}%"></i></span></td><td>${d}/${n}</td><td>${cp||'—'}</td><td><span class="rp-st rp-st-${s[0]}">${s[1]}</span></td></tr>`;
+     }).join('')}</tbody>
+    </table>
+   </section>
+
+   <section class="rp-block">
+    <h3 class="rp-h"><span>02</span>Pendências prioritárias</h3>
+    ${pending.length?`<ol class="rp-pend">${pending.slice(0,10).map(x=>`<li><div class="rp-pend-h">${chip(x.lv)}<b>${x.it[0]}</b><small>${short(DATA[x.k])}</small></div><p>${x.it[1]} <em>${x.it[2]}</em></p></li>`).join('')}</ol>${pending.length>10?`<p class="rp-more">+ ${pending.length-10} outros itens pendentes no checklist detalhado.</p>`:''}`
+      :`<p class="rp-empty">${RP_ICON.ok} Nenhum item crítico ou importante pendente.</p>`}
+   </section>
+
+   <section class="rp-block rp-detail">
+    <h3 class="rp-h"><span>03</span>Checklist detalhado</h3>
+    ${DATA.map((c,k)=>`<div class="rp-stage">
+      <div class="rp-stage-h"><b>${c.n}</b><span>${catDone(k)}/${c.items.length} verificados</span></div>
+      <table class="rp-items"><tbody>${c.items.map((it,j)=>`<tr class="${state[k][j]?'ok':''}">
+        <td class="rp-ic">${state[k][j]?RP_ICON.ok:RP_ICON.pend}</td>
+        <td><b>${it[0]}</b><p>${it[1]}</p><p class="rp-tip"><span>Como verificar:</span> ${it[2]}</p></td>
+        <td class="rp-meta">${chip(it[3])}<span class="rp-res">${state[k][j]?'Verificado':'Pendente'}</span></td></tr>`).join('')}</tbody></table>
+    </div>`).join('')}
+   </section>
+
+   <section class="rp-block rp-close">
+    <h3 class="rp-h"><span>04</span>Observações</h3>
+    <div class="rp-lines"><i></i><i></i><i></i><i></i><i></i></div>
+    <div class="rp-sign">
+     <div><i></i><span>Comprador</span></div>
+     <div><i></i><span>Vendedor</span></div>
+     <div><i></i><span>Local e data</span></div>
+    </div>
+    <p class="rp-legal">Este relatório registra a checagem feita pelo próprio comprador com o roteiro do ClearInspect. Ele é um guia de verificação e não substitui o laudo de vistoria cautelar, a consulta aos órgãos oficiais (Detran, Senatran) nem a avaliação de um mecânico de confiança.</p>
+   </section>
+   <footer class="rp-foot"><span>ClearInspect · ${id}</span><span>${esc(CI.model||'Veículo')} ${CI.plate?'· '+fmtPlate(CI.plate):''}</span></footer>
+  </div>`;
 }
 window.addEventListener('beforeprint',buildPrint);
 $('pdf').onclick=()=>{buildPrint();window.print();};
@@ -249,6 +366,7 @@ $('reset').onclick=()=>{
   if(!confirm('Apagar todas as marcações, o modelo e a placa?'))return;
   state.forEach(a=>a.fill(false));
   CI.model=CI.plate='';q.value=plate.value='';
+  if(window.Car3D&&Car3D.setPlate)Car3D.setPlate('');
   save();select(0);toast('Checagem reiniciada');
 };
 
