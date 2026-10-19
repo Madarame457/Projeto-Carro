@@ -208,6 +208,37 @@ function arcParams(f,t0,t1,n,inclusive){
   return out;
 }
 
+/* ---------- Gerador de malha a partir de uma grade (u = comprimento, v = seção) ---------- */
+// cls(i,j) devolve o índice do material de cada quadrado; closed = seção fechada
+function gridMesh(P,nu,nv,closed,cls,mats){
+  const pos=new Float32Array(P),groups=mats.map(()=>[]);
+  const cols=closed?nv:nv-1,step=nv;
+  for(let i=0;i<nu-1;i++)for(let j=0;j<cols;j++){
+    const a=i*step+j,b=i*step+(j+1)%nv,c=a+step,d=b+step;
+    groups[cls?cls(i,j):0].push(a,c,b,c,d,b);
+  }
+  const g=new THREE.BufferGeometry();
+  g.setAttribute('position',new THREE.BufferAttribute(pos,3));
+  let n=0;groups.forEach((arr,k)=>{if(arr.length){g.addGroup(n,arr.length,k);n+=arr.length;}});
+  const ia=new Uint32Array(n);n=0;groups.forEach(arr=>{ia.set(arr,n);n+=arr.length;});
+  g.setIndex(new THREE.BufferAttribute(ia,1));g.computeVertexNormals();
+  return new THREE.Mesh(g,mats);
+}
+// "Adesivo" sobre a lataria: grade em (x, ângulo) deslocada para fora pela normal
+function decal(T,x0,x1,thf,off,mat,nu=28,nv=8,yMax){
+  const P=[],p={};
+  for(let i=0;i<=nu;i++){
+    const u=i/nu,x=lerp(x0,x1,u),S=section(T,x),[a,b]=thf(S,u);
+    for(let j=0;j<=nv;j++){ringPt(S,lerp(a,b,j/nv),p);P.push(x,yMax?Math.min(p.y,yMax):p.y,p.z);}
+  }
+  const m=gridMesh(P,nu+1,nv+1,false,null,[mat]),g=m.geometry,pa=g.attributes.position,na=g.attributes.normal;
+  for(let k=0;k<pa.count;k++)pa.setXYZ(k,pa.getX(k)+na.getX(k)*off,pa.getY(k)+na.getY(k)*off,pa.getZ(k)+na.getZ(k)*off);
+  g.computeVertexNormals();
+  m.material=mat;g.clearGroups();
+  return m;
+}
+const both=(g,mk)=>{const a=mk(),b=mk();b.scale.z=-1;g.add(a,b);return [a,b];};
+
 // Monta um carro e devolve também as âncoras dos pontos de checagem
 function buildCar(type){
   const T=TYPES[type],g=new THREE.Group(),ar=T.r+.08,W=T.W;
