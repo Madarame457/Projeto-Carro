@@ -80,6 +80,8 @@ h1 .hl{background:linear-gradient(90deg,#c9d4ff,var(--blue2));-webkit-background
 .no3d-msg{display:none}
 .no3d-msg p{margin:0;line-height:1.5}
 .viewer.ready .viewer-loading,.viewer.no3d .viewer-loading{display:none}
+.viewer.ready.loading3d .viewer-loading{display:flex;background:rgba(10,12,17,.45);backdrop-filter:blur(2px)}
+.viewer.loading3d .hotspots{opacity:0}
 .viewer.no3d .no3d-msg{display:flex}
 .viewer.no3d .hotspots,.viewer.no3d .drag-hint,.viewer:not(.ready) .hotspots{display:none}
 .viewer.no3d{cursor:default}

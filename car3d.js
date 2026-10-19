@@ -1,6 +1,17 @@
-// Visualizador 3D do carro. O Three.js é carregado do CDN por import() dinâmico,
-// assim o site também funciona abrindo o index.html direto (file://).
-// Os modelos são gerados por código: perfil lateral extrudado + rodas + vidros.
+// Visualizador 3D do carro (Three.js carregado do CDN por import() dinâmico,
+// para o site funcionar também abrindo o index.html direto, via file://).
+//
+// Os carros exibidos são modelos reais do Blend Swap (créditos no rodapé do site),
+// convertidos para glTF e embutidos em models/*.js. Se um modelo não carregar,
+// entra em cena o carro gerado por código descrito abaixo.
+//
+// Os carros são modelados por código, como num software de CAD:
+//  - a carroceria é uma "superfície por seções": dezenas de cortes transversais
+//    arredondados (superelipses) definidos por perfis suaves de altura e largura;
+//  - as caixas de roda são recortadas na própria superfície;
+//  - a estufa (vidros, colunas e teto) é uma segunda superfície com inclinação lateral;
+//  - faróis, lanternas e frisos são "adesivos" gerados sobre a superfície da lataria;
+//  - rodas com pneu de perfil real, aro de raios duplos, disco e pinça de freio.
 (async()=>{
 const box=document.getElementById('viewer');
 const layer=document.getElementById('hotspots');
@@ -545,14 +556,100 @@ function buildCar(type){
 /* ---------- Troca de carroceria com pequena animação ---------- */
 const pivot=new THREE.Group();scene.add(pivot);pivot.add(ao);
 let car=null,pop=1,dist=10;
-function setType(t){
-  if(!TYPES[t])return;
+const built={};
+function show(c){
   if(car)pivot.remove(car.group);
-  car=buildCar(t);
-  pivot.add(car.group);
-  shadow.scale.set(car.len*1.25,car.W*1.6,1);
-  pop=0;
-  resize();
+  car=c;pivot.add(car.group);
+  ao.scale.set(car.len*1.12,car.W*1.35,1);
+  pop=0;resize();box.classList.add('ready');
+}
+let want=null;
+function setType(t){
+  if(!SPECS[t])return;
+  want=t;
+  if(built[t]){box.classList.remove('loading3d');show(built[t]);return;}
+  box.classList.add('loading3d');
+  loadModel(t).catch(err=>{console.warn('Modelo 3D indisponível, usando o carro gerado por código.',err);return buildCar(t);})
+    .then(c=>{built[t]=c;if(want===t){box.classList.remove('loading3d');show(c);}});
+}
+
+/* ---------- Modelos glTF (Blend Swap) ---------- */
+const MODEL_SRC={hatch:'models/hatch.js',sedan:'models/sedan.js',suv:'models/suv.js',picape:'models/picape.js'};
+function modelData(t){
+  return new Promise((res,rej)=>{
+    const ok=()=>window.CI_MODELS&&window.CI_MODELS[t];
+    if(ok())return res(ok());
+    const sc=document.createElement('script');sc.src=MODEL_SRC[t];sc.async=true;
+    sc.onload=()=>ok()?res(ok()):rej(new Error('modelo vazio'));
+    sc.onerror=()=>rej(new Error('falha ao baixar '+MODEL_SRC[t]));
+    document.head.appendChild(sc);
+  });
+}
+const DS=THREE.DoubleSide;
+const GM={
+  paint:M.paint,glass:new THREE.MeshPhysicalMaterial({color:0x07090d,metalness:.3,roughness:.14,envMapIntensity:1.1}),chrome:M.chrome,black:M.trim,gloss:M.gloss,rubber:M.tire,rim:M.rim,metal:M.disc,
+  mirror:new THREE.MeshStandardMaterial({color:0xdfe6ee,metalness:1,roughness:.04}),
+  lens:new THREE.MeshPhysicalMaterial({color:0xffffff,metalness:0,roughness:0,transparent:true,opacity:.16,envMapIntensity:2.5,depthWrite:false}),
+  light:new THREE.MeshStandardMaterial({color:0xf3f6fb,metalness:.85,roughness:.12,emissive:0xe6eeff,emissiveIntensity:.5}),
+  red:new THREE.MeshPhysicalMaterial({color:0x8a0b10,metalness:.2,roughness:.12,clearcoat:1,emissive:0x5a0000,emissiveIntensity:1}),
+  amber:new THREE.MeshPhysicalMaterial({color:0xff9a2e,metalness:.2,roughness:.15,clearcoat:1,emissive:0x7a3a00,emissiveIntensity:.6}),
+  plate:new THREE.MeshStandardMaterial({color:0xf2f4f7,roughness:.5}),
+  interior:new THREE.MeshStandardMaterial({color:0x1d1e22,roughness:.85})
+};
+// Pintura e vidros só pela frente: as cascas internas (solidify) não "brigam" com a externa
+Object.values(GM).forEach(m=>{if(m!==M.paint&&m!==GM.glass)m.side=DS;});
+const b64buf=b64=>{const bin=atob(b64),u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);return u.buffer;};
+async function loadModel(t){
+  if(!GLTFLoader)throw new Error('GLTFLoader indisponível');
+  const data=await modelData(t);
+  const loader=new GLTFLoader();loader.setMeshoptDecoder(MeshoptDecoder);
+  const gltf=await new Promise((res,rej)=>loader.parse(b64buf(data),'',res,rej));
+  return prepare(gltf.scene,t);
+}
+// Ajusta materiais, apoia no chão, centraliza e calcula os pontos clicáveis
+function prepare(root,t){
+  const byCls={};
+  root.traverse(o=>{
+    if(!o.isMesh)return;
+    const k=(o.material&&o.material.name||'').replace(/^ci_/,'');
+    o.material=GM[k]||GM.black;o.castShadow=true;o.receiveShadow=false;
+    (byCls[k]=byCls[k]||[]).push(o);
+  });
+  const g=new THREE.Group();g.add(root);g.updateMatrixWorld(true);
+  const pts=(list,f)=>{const v=new Vector3(),out=[];(list||[]).forEach(o=>{const pa=o.geometry.attributes.position;
+    for(let i=0;i<pa.count;i+=(f||1)){v.fromBufferAttribute(pa,i).applyMatrix4(o.matrixWorld);out.push(v.clone());}});return out;};
+  const bb=new THREE.Box3().setFromObject(root,true);
+  const tyres=pts(byCls.rubber,3),minY=tyres.length?Math.min(...tyres.map(p=>p.y)):bb.min.y;
+  root.position.x-=(bb.min.x+bb.max.x)/2;root.position.z-=(bb.min.z+bb.max.z)/2;root.position.y-=minY;
+  g.updateMatrixWorld(true);
+  const B=new THREE.Box3().setFromObject(root,true),L=B.max.x-B.min.x,H=B.max.y,F=B.max.x,R=B.min.x;
+  // Placa Mercosul por cima das placas do modelo
+  const plates=pts(byCls.plate);
+  [[p=>p.x<0,-1],[p=>p.x>0,1]].forEach(([sel,dir])=>{
+    const ps=plates.filter(sel);if(ps.length<4)return;
+    const pb=new THREE.Box3().setFromPoints(ps),sz=pb.getSize(new Vector3()),c=pb.getCenter(new Vector3());
+    if(sz.z<.25||sz.z>.7||sz.y<.06||sz.y>.3)return;
+    const m=new THREE.Mesh(new THREE.PlaneGeometry(sz.z*.98,sz.y*.96),plateM);
+    m.position.set(dir>0?pb.max.x+.004:pb.min.x-.004,c.y,c.z);m.rotation.y=dir>0?Math.PI/2:-Math.PI/2;g.add(m);
+  });
+  // Pontos clicáveis: raios contra a própria malha
+  const rc=new THREE.Raycaster(),hit=(o,d,want)=>{rc.set(o,d.normalize());const hs=rc.intersectObject(root,true);
+    const h=want?hs.find(x=>x.object.material===want)||hs[0]:hs[0];return h?h.point:null;};
+  let win=null;for(const f of [.8,.76,.84,.72]){win=hit(new Vector3(F-L*.47,H*f,9),new Vector3(0,0,-1),GM.glass);if(win&&win.y>H*.6)break;}
+  const door=hit(new Vector3(F-L*.4,H*.47,9),new Vector3(0,0,-1))||new Vector3(F-L*.4,H*.47,B.max.z);
+  const hood=hit(new Vector3(F-L*.17,9,0),new Vector3(0,-1,0))||new Vector3(F-L*.17,H*.6,0);
+  const rp=g.children.find(c=>c.isMesh&&c.material===plateM&&c.position.x<0);
+  const plate=rp?rp.position.clone().add(new Vector3(-.01,0,0)):(hit(new Vector3(-9,H*.42,0),new Vector3(1,0,0))||new Vector3(R,H*.42,0));
+  const tr=pts(byCls.rubber,3).filter(p=>p.x<0&&p.z>0);
+  let wheel=new Vector3(R+L*.2,.33,B.max.z*.9);
+  if(tr.length){const wb=new THREE.Box3().setFromPoints(tr);wheel=new Vector3((wb.min.x+wb.max.x)/2,(wb.min.y+wb.max.y)/2,wb.max.z);}
+  return {group:g,len:L,W:B.max.z-B.min.z,H,model:true,anchors:[
+    {p:win||new Vector3(F-L*.47,H*.78,B.max.z*.8),n:new Vector3(0,.15,1).normalize()},
+    {p:door,n:new Vector3(0,0,1)},
+    {p:hood,n:new Vector3(.45,.9,0).normalize()},
+    {p:plate,n:new Vector3(-1,0,0)},
+    {p:wheel,n:new Vector3(0,0,1)}
+  ]};
 }
 
 // Controles: arrastar gira o carro (horizontal) e a câmera (vertical)
@@ -584,9 +681,8 @@ function resize(){
   renderer.setSize(w,h,false);
   camera.aspect=w/h;
   camera.updateProjectionMatrix();
-  // Distância que enquadra o carro inteiro em qualquer proporção de tela
-  const L=car?car.len:4.3,fov=camera.fov*Math.PI/180;
-  dist=Math.max(L*.7/Math.tan(fov/2)/Math.min(camera.aspect,1.6),2.1/Math.tan(fov/2));
+  const L=car?car.len:4.4,fov=camera.fov*Math.PI/180;
+  dist=Math.max(L*(car&&car.model?.8:.68)/Math.tan(fov/2)/Math.min(camera.aspect,1.6),2.2/Math.tan(fov/2));
 }
 new ResizeObserver(resize).observe(box);
 
