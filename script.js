@@ -51,6 +51,7 @@ const DATA=[
   ["Ruídos em Movimento","Com o rádio desligado, escute batidas na suspensão, zumbidos e chiados em curvas e lombadas.","Zumbido que aumenta com a velocidade costuma ser rolamento de roda.","i"],
   ["Ar-Condicionado e Ventilação","Ligue o ar no máximo: ele deve gelar em poucos minutos, sem ruído nem cheiro ruim.","Ar que só gela com o carro em movimento pode indicar falta de gás ou problema no eletroventilador.","r"]]}
 ];
+const TOTAL=DATA.reduce((n,c)=>n+c.items.length,0);
 const short=c=>c.n.replace(/^\d+\.\s*/,'');
 const $=id=>document.getElementById(id);
 
