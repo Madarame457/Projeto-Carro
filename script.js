@@ -29,7 +29,9 @@ const DATA=[
  {n:"3. Checagem Mecânica",t:"Checagem: Mecânica",i:"sliders",items:[
   ["Motor e Fluidos","Confira nível e cor do óleo, líquido de arrefecimento e vazamentos sob o carro.","Óleo muito escuro ou com aspecto leitoso é sinal de alerta.","c"],
   ["Suspensão e Freios","Teste freios em baixa velocidade e escute ruídos ao passar em buracos.","Puxões para um lado ou vibração no pedal exigem revisão.","c"],
-  ["Scanner de Falhas","Use um scanner OBD-II para ler códigos de erro armazenados.","Luzes do painel apagadas com códigos ativos podem indicar fraude.","i"]]},
+  ["Scanner de Falhas","Use um scanner OBD-II para ler códigos de erro armazenados.","Luzes do painel apagadas com códigos ativos podem indicar fraude.","i"],
+  ["Arrefecimento e Superaquecimento","O reservatório deve estar limpo, sem óleo boiando, e o ponteiro de temperatura estável.","Óleo no líquido de arrefecimento ou água no óleo pode indicar junta do cabeçote queimada, um reparo caro.","c"],
+  ["Correia Dentada e Acessórios","Pergunte quando foi a última troca da correia dentada e veja o estado das correias auxiliares.","Correia vencida pode romper e danificar o motor. Peça a nota fiscal da troca.","i"]]},
  {n:"4. Documentação",t:"Checagem: Documentação",i:"doc",items:[
   ["CRLV e Licenciamento","Confirme que o licenciamento está em dia e sem multas ou débitos.","Consulte o Detran do estado para verificar pendências.","c"],
   ["Nome do Proprietário","O vendedor deve ser o proprietário registrado no documento.","Se for procurador, exija procuração válida e reconhecida em cartório.","c"],
