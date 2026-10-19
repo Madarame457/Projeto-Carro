@@ -375,6 +375,41 @@ function buildCar(type){
       return [thAtY(S,lo),thAtY(S,Math.max(lo,hi))];
     },.006,M.trim,80,6));
   });
+
+  // 3) Estufa: vidros, colunas e teto
+  const [xa,xc]=T.gh,ya=T.ytf(xa)+.012,yc=T.ytf(xc)+.012;
+  const yr=curve([[xc,yc],...T.roof.slice().reverse(),[xa,ya]].sort((a,b)=>a[0]-b[0]));
+  const gx=xs.filter(x=>x>=xc&&x<=xa),NG=80,GP=[],ginfo=[];
+  const CT=.52,CP=.74,CF=.78;                                  // limites topo / coluna / moldura
+  let gk=null,gS;
+  const ng=T.ng,gpt=(x,ph,o={})=>{
+    if(gk!==x){const S=section(T,x),hwB=S.hw*.95,base=topYAtZ(S,hwB)-.012,top=Math.max(yr(x),S.yt+.012);gS={hwB,base,top,h:top-base};gk=x;}
+    const {hwB,base,top,h}=gS;
+    const c=Math.cos(ph),s=Math.sin(ph),e=2/ng,q=Math.pow(s,e);
+    o.base=base;o.top=top;o.y=base+h*q;o.z=hwB*(1-.2*q*clamp(h/.4,0,1))*Math.sign(c)*Math.pow(Math.abs(c),e);return o;
+  };
+  const xm=(T.roofX[0]+T.roofX[1])/2;
+  const phis=arcParams(ph=>gpt(xm,ph),0,Math.PI,NG,true);
+  [CT,CP,CF].forEach(cv=>{phis.push(Math.acos(cv),Math.acos(-cv));});
+  phis.sort((a,b)=>a-b);
+  gx.forEach(x=>{
+    const o={};phis.forEach((ph,j)=>{gpt(x,ph,o);GP.push(x,o.y,o.z);});
+    ginfo.push({x,base:o.base,top:o.top});
+  });
+  const NP=phis.length,[sx0,sx1]=[T.side[1],T.side[0]];
+  const gh=gridMesh(GP,gx.length,NP,false,(i,j)=>{
+    const x=(gx[i]+gx[i+1])/2,c=Math.abs(Math.cos((phis[j]+phis[j+1])/2));
+    if(x>xa-.05||x<xc+.04)return 2;                            // vedação do para-brisa/vigia
+    if(c<CT)return (x>T.roofX[0]&&x<T.roofX[1])?0:1;          // teto ou para-brisa/vigia
+    if(c<CP)return 0;                                          // colunas A/C e calha do teto
+    if(x<sx0||x>sx1)return 0;                                  // colunas fora das janelas
+    if(c<CF)return 2;                                          // moldura preta das janelas
+    if(Math.abs(x-T.B)<.05||(T.C2&&Math.abs(x-T.C2)<.035))return 2; // coluna B (e C no SUV)
+    const S=ginfo[i];if(GP[(i*NP+j)*3+1]<S.base+.035)return 2; // friso da linha de cintura
+    return 1;
+  },[M.paint,M.glass,M.gloss]);
+  gh.castShadow=true;g.add(gh);
+
   const pl=new THREE.Mesh(new THREE.BoxGeometry(.03,.15,.5),plateM);
   pl.position.set(T.plate[0],T.plate[1],0);g.add(pl);
   // Caçamba da picape e rack de teto do SUV
