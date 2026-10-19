@@ -31,7 +31,9 @@ const DATA=[
   ["Suspensão e Freios","Teste freios em baixa velocidade e escute ruídos ao passar em buracos.","Puxões para um lado ou vibração no pedal exigem revisão.","c"],
   ["Scanner de Falhas","Use um scanner OBD-II para ler códigos de erro armazenados.","Luzes do painel apagadas com códigos ativos podem indicar fraude.","i"],
   ["Arrefecimento e Superaquecimento","O reservatório deve estar limpo, sem óleo boiando, e o ponteiro de temperatura estável.","Óleo no líquido de arrefecimento ou água no óleo pode indicar junta do cabeçote queimada, um reparo caro.","c"],
-  ["Correia Dentada e Acessórios","Pergunte quando foi a última troca da correia dentada e veja o estado das correias auxiliares.","Correia vencida pode romper e danificar o motor. Peça a nota fiscal da troca.","i"]]},
+  ["Correia Dentada e Acessórios","Pergunte quando foi a última troca da correia dentada e veja o estado das correias auxiliares.","Correia vencida pode romper e danificar o motor. Peça a nota fiscal da troca.","i"],
+  ["Embaixo do Carro","Com uma lanterna, procure vazamentos, escapamento furado, coxins rachados e amortecedores com óleo.","Se possível, peça para erguer o carro em um elevador de oficina.","i"],
+  ["Bateria e Parte Elétrica","Teste vidros, travas, retrovisores, multimídia, buzina e limpadores. Veja a data da bateria.","Bateria com terminais esverdeados (zinabre) ou mais de três anos de uso pode precisar de troca em breve.","r"]]},
  {n:"4. Documentação",t:"Checagem: Documentação",i:"doc",items:[
   ["CRLV e Licenciamento","Confirme que o licenciamento está em dia e sem multas ou débitos.","Consulte o Detran do estado para verificar pendências.","c"],
   ["Nome do Proprietário","O vendedor deve ser o proprietário registrado no documento.","Se for procurador, exija procuração válida e reconhecida em cartório.","c"],
