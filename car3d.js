@@ -326,45 +326,54 @@ function capPiece(g,geo,mat,x,y,z,dir){
 
 /* ---------- Montagem do carro ---------- */
 function buildCar(type){
-  const T=TYPES[type],g=new THREE.Group(),ar=T.r+.08,W=T.W;
-  // Carroceria inferior com recortes das caixas de roda
-  const s=new THREE.Shape(),[fa,ra]=T.ax;
-  s.moveTo(T.R+.12,T.y0);
-  [ra,fa].forEach(a=>{
-    s.lineTo(a-ar,T.y0);s.lineTo(a-ar,T.r);
-    s.absarc(a,T.r,ar,Math.PI,0,true);
-    s.lineTo(a+ar,T.y0);
+  const T=Object.assign({},SPECS[type]);
+  T.ytf=curve(T.yt);T.ybf=curve(T.yb);T.ar=T.r+T.gap;
+  T.plan=curve([[T.R,.93],[T.R+.7,1],[T.F-.8,1],[T.F,.94]]);
+  const g=new THREE.Group(),[fa,ra]=T.ax,L=T.F-T.R;
+
+  // 1) Estações ao longo do comprimento: mais densas nas pontas e nas caixas de roda
+  let xs=[];const N=150;
+  for(let i=0;i<=N;i++)xs.push(T.R+L*(.5-.5*Math.cos(Math.PI*i/N)));
+  for(let i=0;i<=70;i++)xs.push(T.R+L*i/70);
+  T.ax.forEach(a=>{for(let k=-30;k<=30;k++)xs.push(a+T.ar*k/30);xs.push(a-T.ar-.006,a+T.ar+.006);});
+  [T.gh[0],T.gh[1],...T.doors].forEach(v=>xs.push(v));
+  if(T.bed!==undefined)xs.push(T.bed-.02,T.bed-.04);
+  xs=xs.filter(v=>v>=T.R&&v<=T.F).sort((a,b)=>a-b).filter((v,i,a)=>!i||v-a[i-1]>.0015);
+
+  // 2) Carroceria inferior. Ângulos da seção: uniformes + extras no vinco lateral
+  const ref=section(T,(fa+ra)/2);ref.clip=-1;ref.bed=false;
+  let ths=arcParams(t=>ringPt(ref,t,{}),-Math.PI/2,Math.PI*1.5,150,false);
+  for(let k=0;k<=14;k++){const q=lerp(.42,.58,k/14),t=Math.asin(Math.pow(q,T.nt/2));ths.push(t,Math.PI-t);}
+  ths=ths.sort((a,b)=>a-b).filter((v,i,a)=>!i||v-a[i-1]>.0008);
+  const NV=ths.length,P=[],secs=[],p={};
+  xs.forEach(x=>{const S=section(T,x);secs.push(S);ths.forEach(t=>{ringPt(S,t,p);P.push(x,p.y,p.z);});});
+  const body=gridMesh(P,xs.length,NV,true,(i,j)=>{
+    const k=(i*NV+j)*3,k2=((i+1)*NV+(j+1)%NV)*3;
+    const x=(P[k]+P[k2])/2,y=(P[k+1]+P[k2+1])/2,z=Math.abs(P[k+2]+P[k2+2])/2,S=secs[i];
+    if(S.clip>0&&y<=S.clip+.002)return 1;                       // forro da caixa de roda
+    if(y<T.ybf(x)+.012)return 1;                                // assoalho
+    if(S.bed&&z<S.hw-.075&&y>S.yt-.08)return 1;                 // capota marítima da caçamba
+    return 0;
+  },[M.paint,M.trim]);
+  // Tampas dianteira e traseira (planas: recebem grade, placa e luzes)
+  const capPoly=(S,cut)=>ths.map(t=>{ringPt(S,t,p);return new THREE.Vector2(p.z,Math.min(p.y,cut));});
+  [0,xs.length-1].forEach(i=>{
+    const S=secs[i],m=new THREE.Mesh(new THREE.ShapeGeometry(new THREE.Shape(capPoly(S,9)),1),M.paint);
+    m.position.x=S.x;m.rotation.y=i?Math.PI/2:-Math.PI/2;g.add(m);
+    // faixa inferior preta do para-choque, recortada no mesmo contorno
+    const tm=new THREE.Mesh(new THREE.ShapeGeometry(new THREE.Shape(capPoly(S,T.ybf(S.x)+T.trimH)),1),M.trim);
+    tm.position.x=S.x+(i?.0015:-.0015);tm.rotation.y=m.rotation.y;g.add(tm);
   });
-  s.lineTo(T.F-.12,T.y0);
-  T.top.forEach(p=>p[0]==='L'?s.lineTo(p[1],p[2]):s.quadraticCurveTo(p[1],p[2],p[3],p[4]));
-  g.add(new THREE.Mesh(extrude(s,W,.08),paint));
-  // Cabine de vidro + teto pintado
-  const cabW=W*.86;
-  g.add(new THREE.Mesh(extrude(path(T.cab[0],T.cab.slice(1)),cabW,.1),glass));
-  const [r0,r1,ry]=T.roof;
-  const roof=path([r0,ry-.05],[['L',r1,ry-.05],['Q',r1+.12,ry-.04,r1+.1,ry+.03],['L',r0-.05,ry+.03],['Q',r0-.14,ry-.04,r0,ry-.05]]);
-  g.add(new THREE.Mesh(extrude(roof,cabW+.06,.04),paint));
-  // Coluna central (B) escurecida
-  const bp=new THREE.Mesh(new THREE.BoxGeometry(.09,ry-T.cab[0][1]-.1,cabW+.22),black);
-  bp.position.set((r0+r1)/2+(type==='picape'?0:.05),(ry+T.cab[0][1])/2-.02,0);
-  if(type!=='picape')g.add(bp);
-  // Saias laterais, para-choques e grade
-  const len=T.F-T.R;
-  const sill=new THREE.Mesh(new THREE.BoxGeometry(fa-ra-ar*2-.05,.09,W+.03),black);
-  sill.position.set((fa+ra)/2,T.y0+.06,0);g.add(sill);
-  const grill=new THREE.Mesh(new THREE.BoxGeometry(.1,.16,W*.5),black);
-  grill.position.set(T.F+.04,T.lf[1]-.17,0);g.add(grill);
-  const bumpF=new THREE.Mesh(new THREE.BoxGeometry(.12,.1,W*.82),black);
-  bumpF.position.set(T.F+.03,T.y0+.12,0);g.add(bumpF);
-  const bumpR=bumpF.clone();bumpR.position.x=T.R-.01;g.add(bumpR);
-  // Faróis, lanternas e placa
-  [-1,1].forEach(z=>{
-    const h=new THREE.Mesh(new THREE.BoxGeometry(.12,.07,W*.24),headM);
-    h.position.set(T.lf[0],T.lf[1],z*W*.32);g.add(h);
-    const t=new THREE.Mesh(new THREE.BoxGeometry(.1,.08,W*.26),tailM);
-    t.position.set(T.lr[0],T.lr[1],z*W*.32);g.add(t);
-    const m=new THREE.Mesh(new THREE.BoxGeometry(.18,.08,.05),paint);
-    m.position.set(T.cab[0][0]-.25,T.cab[0][1]+.12,z*(cabW/2+.12));g.add(m);
+  body.castShadow=true;g.add(body);
+  // Saia lateral e moldura das caixas de roda (acompanham a lataria, sem degraus)
+  both(g,()=>decal(T,T.R,T.F,S=>[thAtY(S,S.yb+.004),thAtY(S,T.ybf(S.x)+T.trimH)],.0015,M.trim,220,4));
+  if(T.clad)T.ax.forEach(a=>{
+    const cw=.075,ao=T.ar+cw;
+    both(g,()=>decal(T,a-ao,a+ao,S=>{
+      const dx=S.x-a,lo=Math.abs(dx)<T.ar?T.r+.02+Math.sqrt(T.ar*T.ar-dx*dx)+.001:T.ybf(S.x)+T.trimH-.002;
+      const hi=Math.min(S.yt-.1,T.r+.02+Math.sqrt(Math.max(0,ao*ao-dx*dx)));
+      return [thAtY(S,lo),thAtY(S,Math.max(lo,hi))];
+    },.006,M.trim,80,6));
   });
   const pl=new THREE.Mesh(new THREE.BoxGeometry(.03,.15,.5),plateM);
   pl.position.set(T.plate[0],T.plate[1],0);g.add(pl);
