@@ -81,35 +81,25 @@ const ring=new THREE.Mesh(new THREE.RingGeometry(3.15,3.17,160),new THREE.MeshBa
 ring.rotation.x=-Math.PI/2;ring.position.y=.001;
 scene.add(disc,ring,ground);
 
-// Materiais compartilhados
-const paint=new THREE.MeshPhysicalMaterial({color:CI.color,metalness:.45,roughness:.35,clearcoat:1,clearcoatRoughness:.06});
-const glass=new THREE.MeshPhysicalMaterial({color:0x0b111c,metalness:.3,roughness:.04,clearcoat:1,envMapIntensity:1.4});
-const black=new THREE.MeshStandardMaterial({color:0x111318,roughness:.6,metalness:.2});
-const tire=new THREE.MeshStandardMaterial({color:0x121212,roughness:.92});
-const rim=new THREE.MeshStandardMaterial({color:0xcfd5de,metalness:1,roughness:.25});
-const headM=new THREE.MeshStandardMaterial({color:0xffffff,emissive:0xeaf2ff,emissiveIntensity:2.2});
-const tailM=new THREE.MeshStandardMaterial({color:0x550000,emissive:0xff1a1a,emissiveIntensity:1.6});
-const plateM=new THREE.MeshStandardMaterial({color:0xf2f4f8,roughness:.5});
-
-// Perfis laterais de cada carroceria. Segmentos: ['L',x,y] linha, ['Q',cx,cy,x,y] curva.
-// F/R: frente/traseira, ax: eixos, r: raio da roda, y0: altura do assoalho, W: largura.
-const TYPES={
- hatch:{F:1.95,R:-2,ax:[1.25,-1.25],r:.33,y0:.28,W:1.74,
-  top:[['L',1.95,.45],['Q',2.03,.62,1.93,.74],['L',1.78,.8],['Q',1.3,.9,.7,.96],['L',-1.7,1],['Q',-1.98,1,-2.02,.85],['L',-2,.36],['Q',-1.98,.28,-1.9,.28]],
-  cab:[[.75,.9],['L',.05,1.36],['Q',-.12,1.43,-.38,1.43],['L',-1.3,1.41],['Q',-1.58,1.39,-1.74,1.2],['L',-1.94,.98],['L',-1.94,.9]],
-  roof:[-1.4,.02,1.43],lf:[1.9,.76],lr:[-2.03,.9],plate:[-2.04,.58]},
- sedan:{F:2.15,R:-2.15,ax:[1.3,-1.3],r:.33,y0:.28,W:1.8,
-  top:[['L',2.15,.45],['Q',2.24,.62,2.12,.74],['L',1.95,.8],['Q',1.4,.92,.85,.96],['L',-1.25,.98],['Q',-1.75,.98,-2.08,.92],['Q',-2.22,.88,-2.2,.62],['L',-2.15,.36],['Q',-2.12,.28,-2.02,.28]],
-  cab:[[.9,.9],['L',.18,1.35],['Q',.02,1.42,-.24,1.42],['L',-.78,1.42],['Q',-.98,1.41,-1.12,1.3],['L',-1.5,.97],['L',-1.5,.9]],
-  roof:[-.92,.08,1.42],lf:[2.1,.76],lr:[-2.2,.86],plate:[-2.24,.6]},
- suv:{F:2.2,R:-2.2,ax:[1.35,-1.35],r:.38,y0:.36,W:1.86,
-  top:[['L',2.22,.55],['Q',2.32,.78,2.2,.95],['L',2.05,1],['Q',1.5,1.08,1,1.12],['L',-1.95,1.15],['Q',-2.22,1.15,-2.26,.95],['L',-2.24,.45],['Q',-2.22,.36,-2.12,.36]],
-  cab:[[1.05,1.05],['L',.32,1.6],['Q',.16,1.67,-.1,1.67],['L',-1.85,1.65],['Q',-2.06,1.63,-2.11,1.48],['L',-2.18,1.1],['L',-2.18,1.05]],
-  roof:[-1.95,.12,1.67],rails:true,lf:[2.2,.96],lr:[-2.27,1.05],plate:[-2.3,.68]},
- picape:{F:2.45,R:-2.5,ax:[1.55,-1.5],r:.37,y0:.36,W:1.84,
-  top:[['L',2.47,.55],['Q',2.56,.8,2.45,.95],['L',2.3,1],['Q',1.8,1.08,1.25,1.12],['L',-2.4,1.16],['Q',-2.52,1.16,-2.52,1],['L',-2.5,.45],['Q',-2.48,.36,-2.38,.36]],
-  cab:[[1.3,1.05],['L',.6,1.62],['Q',.45,1.69,.2,1.69],['L',-.55,1.69],['Q',-.69,1.67,-.71,1.55],['L',-.73,1.1],['L',-.73,1.05]],
-  roof:[-.62,.42,1.69],bed:[-2.38,-.84],lf:[2.45,.96],lr:[-2.55,1.02],plate:[-2.56,.62]}
+/* ---------- Materiais ---------- */
+const M={
+  paint:new THREE.MeshPhysicalMaterial({color:CI.color,metalness:.5,roughness:.36,clearcoat:1,clearcoatRoughness:.09}),
+  glass:new THREE.MeshPhysicalMaterial({color:0x080b10,metalness:.2,roughness:.04,clearcoat:1,clearcoatRoughness:.02,envMapIntensity:1.6}),
+  gloss:new THREE.MeshPhysicalMaterial({color:0x07080a,metalness:.1,roughness:.12,clearcoat:1,clearcoatRoughness:.05}),
+  trim:new THREE.MeshStandardMaterial({color:0x101216,roughness:.62,metalness:.05}),
+  chrome:new THREE.MeshStandardMaterial({color:0xe9edf2,metalness:1,roughness:.08}),
+  tire:new THREE.MeshStandardMaterial({color:0x17181a,roughness:.88}),
+  rim:new THREE.MeshStandardMaterial({color:0xc3c8d0,metalness:1,roughness:.22}),
+  rimDark:new THREE.MeshStandardMaterial({color:0x2b2e34,metalness:.85,roughness:.38}),
+  disc:new THREE.MeshStandardMaterial({color:0x8d9198,metalness:.9,roughness:.42}),
+  caliper:new THREE.MeshStandardMaterial({color:0x32353b,metalness:.4,roughness:.45}),
+  void:new THREE.MeshBasicMaterial({color:0x020203}),
+  lamp:new THREE.MeshPhysicalMaterial({color:0x14181e,metalness:.6,roughness:.06,clearcoat:1}),
+  led:new THREE.MeshStandardMaterial({color:0xffffff,emissive:0xeef4ff,emissiveIntensity:3}),
+  lens:new THREE.MeshStandardMaterial({color:0xdfe8ff,emissive:0xcfe0ff,emissiveIntensity:1.2,metalness:.3,roughness:.1}),
+  tail:new THREE.MeshPhysicalMaterial({color:0x4a060a,metalness:.3,roughness:.08,clearcoat:1,emissive:0x300000,emissiveIntensity:1}),
+  tailLed:new THREE.MeshStandardMaterial({color:0xb00000,emissive:0xff0000,emissiveIntensity:1.15}),
+  amber:new THREE.MeshStandardMaterial({color:0xffa640,emissive:0xff8a1a,emissiveIntensity:.9})
 };
 
 function extrude(shape,depth,bevel){
