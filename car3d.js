@@ -550,14 +550,14 @@ function setType(t){
 }
 
 // Controles: arrastar gira o carro (horizontal) e a câmera (vertical)
-let yaw=-.6,yawT=yaw,pitch=.32,pitchT=pitch,drag=null,idle=0,lastT=performance.now();
+let yaw=-.6,yawT=yaw,pitch=.3,pitchT=pitch,drag=null,idle=0,lastT=performance.now();
 const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const cv=renderer.domElement;
 cv.addEventListener('pointerdown',e=>{drag={x:e.clientX,y:e.clientY,yaw:yawT,pitch:pitchT};cv.setPointerCapture(e.pointerId);box.classList.add('grab');});
 cv.addEventListener('pointermove',e=>{
   if(!drag)return;
   yawT=drag.yaw+(e.clientX-drag.x)*.008;
-  pitchT=Math.min(.75,Math.max(.05,drag.pitch+(e.clientY-drag.y)*.004));
+  pitchT=Math.min(.75,Math.max(.04,drag.pitch+(e.clientY-drag.y)*.004));
   idle=0;
 });
 const end=()=>{drag=null;box.classList.remove('grab');};
@@ -569,7 +569,7 @@ function focus(k){
   let target=Math.atan2(camera.position.x,camera.position.z)-Math.atan2(n.x,n.z);
   target+=(n.y>.5?-.5:.35); // vista 3/4 em vez de totalmente de frente
   const d=((target-yawT)%(Math.PI*2)+Math.PI*3)%(Math.PI*2)-Math.PI;
-  yawT+=d;pitchT=n.y>.5?.55:.28;idle=-5;
+  yawT+=d;pitchT=n.y>.5?.55:.26;idle=-5;
 }
 
 function resize(){
@@ -586,7 +586,7 @@ new ResizeObserver(resize).observe(box);
 
 // Pontos HTML acompanham a projeção 3D
 const hsEls=[...layer.querySelectorAll('.hs')];
-const tmp=new THREE.Vector3(),nrm=new THREE.Vector3(),toCam=new THREE.Vector3();
+const tmp=new Vector3(),nrm=new Vector3(),toCam=new Vector3();
 function placeHotspots(){
   const w=box.clientWidth,h=box.clientHeight;
   hsEls.forEach((el,k)=>{
@@ -606,7 +606,7 @@ function loop(now){
   requestAnimationFrame(loop);
   const dt=Math.min(Math.max((now-lastT)/1000,0),.05);lastT=now;
   idle+=dt;
-  if(!drag&&idle>4&&!reduce)yawT+=dt*.25;
+  if(!drag&&idle>4&&!reduce)yawT+=dt*.22;
   yaw+=(yawT-yaw)*Math.min(1,dt*6);
   pitch+=(pitchT-pitch)*Math.min(1,dt*6);
   pivot.rotation.y=yaw;
