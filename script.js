@@ -39,7 +39,9 @@ const DATA=[
   ["Nome do Proprietário","O vendedor deve ser o proprietário registrado no documento.","Se for procurador, exija procuração válida e reconhecida em cartório.","c"],
   ["Recibo e Transferência","Formalize a venda pela ATPV-e (antigo recibo) e faça a transferência em até 30 dias.","Registre a data e a quilometragem. Enquanto a transferência não sair, multas e IPVA continuam no nome do antigo dono.","c"],
   ["Gravame e Restrições","Consulte se há alienação fiduciária (financiamento), bloqueio judicial ou registro de roubo e furto.","Carro financiado só pode ser transferido depois da quitação e da baixa do gravame pelo banco.","c"],
-  ["Laudo de Vistoria Cautelar","Faça uma vistoria cautelar em uma empresa credenciada antes de pagar.","O laudo aponta repintura, chassi remarcado e estrutura comprometida. O custo é pequeno perto do risco.","i"]]},
+  ["Laudo de Vistoria Cautelar","Faça uma vistoria cautelar em uma empresa credenciada antes de pagar.","O laudo aponta repintura, chassi remarcado e estrutura comprometida. O custo é pequeno perto do risco.","i"],
+  ["Recall Atendido","Consulte pelo chassi, no site da montadora ou no Portal Senatran, se há recall pendente.","Recall é gratuito em qualquer concessionária da marca, mesmo para o segundo dono.","i"],
+  ["Chave Reserva, Manual e Itens Obrigatórios","Confirme chave reserva, manual, estepe, macaco, chave de roda e triângulo.","Chave reserva codificada custa caro. Se estiver faltando, use isso na negociação.","r"]]},
  {n:"5. Teste de Rodagem",t:"Checagem: Teste de Rodagem",i:"road",items:[
   ["Partida e Marcha Lenta","Ligue o motor a frio e observe fumaça, ruídos e estabilidade da marcha lenta.","Motor frio revela problemas que o aquecido pode esconder.","i"],
   ["Câmbio e Embreagem","Passe todas as marchas e note trancos, patinação ou dificuldade de engate.","Em automáticos, observe a suavidade das trocas.","c"],
