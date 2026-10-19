@@ -6,9 +6,15 @@ const box=document.getElementById('viewer');
 const layer=document.getElementById('hotspots');
 const CI=window.CI||{cur:0,type:'sedan',color:'#2c449f',plate:''};
 const fail=()=>box.classList.add('no3d');
-let THREE;
-try{THREE=await import('https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.min.js');}
-catch(e){fail();return;}
+const CDN='https://cdn.jsdelivr.net/npm/three@0.160.0/';
+let THREE,GLTFLoader=null,MeshoptDecoder=null;
+// "three" e "three/addons/" vêm do importmap do index.html (mesma versão do CDN)
+try{THREE=await import('three');}
+catch(e){try{THREE=await import(CDN+'build/three.module.min.js');}catch(e2){fail();return;}}
+try{
+  ({GLTFLoader}=await import('three/addons/loaders/GLTFLoader.js'));
+  ({MeshoptDecoder}=await import('three/addons/libs/meshopt_decoder.module.js'));
+}catch(e){GLTFLoader=null;}
 
 let renderer;
 try{renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});}
