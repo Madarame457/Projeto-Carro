@@ -359,6 +359,30 @@ h4{margin:0 0 6px;font-size:18px;font-weight:600;letter-spacing:-.3px}
   .rp-kpis li:nth-child(1) i::after{background:#dc2626}
   .rp-kpis li:nth-child(2) i::after{background:#e0a100}
 
+  .rp-block{margin-top:20px}
+  .rp-h{display:flex;align-items:center;gap:9px;margin:0 0 9px;padding-bottom:6px;border-bottom:1px solid #e3e6ee;font-size:11pt;font-weight:800;letter-spacing:-.2px;break-after:avoid}
+  .rp-h span{padding:2px 6px;border-radius:5px;background:#eef1fb;color:#2c449f;font-size:7.5pt;font-weight:700}
+  .rp table{width:100%;border-collapse:collapse}
+  .rp-sum th{padding:0 8px 6px;text-align:left;font-size:6.8pt;text-transform:uppercase;letter-spacing:.8px;color:#7a8091;font-weight:700}
+  .rp-sum td{padding:7px 8px;border-top:1px solid #eef0f5;vertical-align:middle;font-variant-numeric:tabular-nums}
+  .rp-bar{display:block;width:120px;height:6px;border-radius:6px;background:#e9ecf3;overflow:hidden}
+  .rp-bar i{display:block;height:100%;background:#2c449f}
+  .rp-st{display:inline-block;padding:2px 8px;border-radius:999px;font-size:7.3pt;font-weight:700;white-space:nowrap}
+  .rp-st-ok{background:#dcfce7;color:#166534}.rp-st-warn{background:#fef3c7;color:#8a5a00}
+  .rp-st-bad{background:#fee2e2;color:#991b1b}.rp-st-none{background:#eef0f5;color:#5b6273}
+
+  .rp-lv{display:inline-block;padding:1px 7px;border-radius:999px;font-size:6.6pt;font-weight:800;text-transform:uppercase;letter-spacing:.5px;white-space:nowrap}
+  .rp-lv-c{background:#fee2e2;color:#b91c1c}.rp-lv-i{background:#fef3c7;color:#8a5a00}.rp-lv-r{background:#e8edfb;color:#2c449f}
+  .rp-pend{list-style:none;margin:0;padding:0;display:grid;gap:7px}
+  .rp-pend li{padding:8px 12px;border:1px solid #e3e6ee;border-radius:8px;break-inside:avoid}
+  .rp-pend-h{display:flex;align-items:center;gap:8px}
+  .rp-pend-h small{margin-left:auto;color:#7a8091;font-size:7.5pt}
+  .rp-pend p{margin:3px 0 0;color:#3a4050;font-size:8.6pt}
+  .rp-pend em{font-style:normal;color:#5b6273}
+  .rp-more{margin:8px 0 0;font-size:8pt;color:#5b6273}
+  .rp-empty{display:flex;align-items:center;gap:8px;margin:0;color:#166534;font-weight:600}
+  .rp-empty svg{width:16px;height:16px}
+
   .printout{display:block;font-family:Inter,Arial,sans-serif}
   .printout h1{font-size:22px;letter-spacing:-.5px;margin:0 0 6px;color:#111;background:none}
   .printout .pmeta{margin:0 0 18px;font-size:13px;color:#444}
