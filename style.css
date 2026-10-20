@@ -143,7 +143,7 @@ h2{margin:10px 0 0;font-size:clamp(26px,3.2vw,36px);font-weight:800;letter-spaci
 .vehicle{margin:0 0 18px;padding:14px;border-radius:12px;background:var(--field);display:grid;gap:10px}
 .vehicle div{display:flex;justify-content:space-between;gap:10px;font-size:14px}
 .vehicle dt{color:var(--muted)}
-.vehicle dd{margin:0;font-weight:600;text-align:right}
+.vehicle dd{margin:0;font-weight:600;text-align:right;min-width:0;overflow-wrap:anywhere}
 .cat-list{list-style:none;margin:0 0 14px;padding:0;display:grid;gap:4px}
 .cat-list button{width:100%;text-align:left;border:0;background:none;color:#c5c9d4;padding:9px 10px;border-radius:9px;cursor:pointer;transition:background .15s}
 .cat-list button:hover{background:var(--field)}
@@ -249,7 +249,7 @@ h4{margin:0 0 6px;font-size:18px;font-weight:600;letter-spacing:-.3px}
 .modal ol{margin:0 0 22px;padding-left:20px;color:var(--muted);line-height:1.7}
 .modal .btn-cta{width:100%;height:48px}
 
-.toast{position:fixed;left:50%;bottom:100px;z-index:40;transform:translate(-50%,20px);padding:12px 18px;border-radius:12px;background:#f2f4f8;color:#0a0c11;font-weight:600;font-size:14.5px;box-shadow:0 12px 30px rgba(0,0,0,.4);opacity:0;pointer-events:none;transition:opacity .25s,transform .25s}
+.toast{position:fixed;left:50%;bottom:100px;z-index:40;transform:translate(-50%,20px);width:max-content;max-width:min(92vw,440px);text-align:center;overflow-wrap:anywhere;padding:12px 18px;border-radius:12px;background:#f2f4f8;color:#0a0c11;font-weight:600;font-size:14.5px;box-shadow:0 12px 30px rgba(0,0,0,.4);opacity:0;pointer-events:none;transition:opacity .25s,transform .25s}
 .toast.show{opacity:1;transform:translate(-50%,0)}
 
 .reveal{opacity:0;transform:translateY(18px);transition:opacity .6s ease,transform .6s ease}
@@ -258,7 +258,7 @@ h4{margin:0 0 6px;font-size:18px;font-weight:600;letter-spacing:-.3px}
 
 /* Responsivo */
 @media (max-width:980px){
-  .hero-in{grid-template-columns:1fr;gap:36px;padding-top:40px}
+  .hero-in{grid-template-columns:minmax(0,1fr);gap:36px;padding-top:40px}
   .viewer{height:380px}
   .check-grid{grid-template-columns:minmax(0,1fr)}
   .summary{position:static;display:grid;grid-template-columns:150px 1fr;gap:6px 22px;align-items:center}
@@ -276,6 +276,8 @@ h4{margin:0 0 6px;font-size:18px;font-weight:600;letter-spacing:-.3px}
 }
 @media (max-width:560px){
   .nav-in{padding:0 16px;gap:12px}
+  .nav-in .btn-cta.sm{padding:0 12px;font-size:13.5px;white-space:nowrap}
+  .logo{font-size:18px}
   .hero-in,.sec-in{padding-left:16px;padding-right:16px}
   .lead{font-size:16.5px}
   .plate-form{flex-direction:column}
@@ -329,6 +331,7 @@ h4{margin:0 0 6px;font-size:18px;font-weight:600;letter-spacing:-.3px}
     background:radial-gradient(70% 60% at 50% 60%,#ffffff,#e9edf5 75%),#e9edf5;border:1px solid #e1e5ee}
   .rp-car img{width:100%;height:100%;object-fit:cover}
   .rp-car svg{width:90px;height:90px}
+  .rp-veh,.rp-foot span{min-width:0;overflow-wrap:anywhere}
   .rp-veh h1{margin:5px 0 12px;font-size:19pt;line-height:1.1;letter-spacing:-.7px;font-weight:800;color:#141821}
   .rp-plate{display:inline-flex;flex-direction:column;width:168px;border:2px solid #1d1f24;border-radius:6px;overflow:hidden;background:#fff}
   .rp-plate-top{background:#1f3fa5;color:#fff;font-size:6.2pt;font-weight:700;letter-spacing:2.4px;text-align:center;padding:1px 0}

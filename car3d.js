@@ -17,7 +17,7 @@ const box=document.getElementById('viewer');
 const layer=document.getElementById('hotspots');
 const CI=window.CI||{cur:0,type:'sedan',color:'#2c449f',plate:''};
 const fail=()=>box.classList.add('no3d');
-const CDN='https://cdn.jsdelivr.net/npm/three@0.160.0/';
+const CDN='./vendor/three/'; // three.js hospedado no próprio site (sem CDN externo)
 let THREE,GLTFLoader=null,MeshoptDecoder=null;
 // "three" e "three/addons/" vêm do importmap do index.html (mesma versão do CDN)
 try{THREE=await import('three');}

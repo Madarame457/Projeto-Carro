@@ -56,11 +56,28 @@ const short=c=>c.n.replace(/^\d+\.\s*/,'');
 const $=id=>document.getElementById(id);
 
 // Estado salvo no navegador (marcações, veículo e aparência do carro 3D)
+// SEGURANÇA: tudo que vem do localStorage é dado não confiável. Antes de ir para a página,
+// para o 3D ou para o relatório, é validado por tipo, formato e tamanho (listas fixas e regex).
 const KEY='clearinspect:v2';
+const TYPES=['hatch','sedan','suv','picape'];
+const COLORS=['#e8ebf0','#9aa3ad','#1b1e24','#c4262e','#2c449f'];
+const MAX_MODEL=60;
+const PLATE_RE=/^[A-Z]{3}\d[A-Z0-9]\d{2}$/;
+// Modelo: só texto, sem caracteres de controle/direção invisíveis, espaços normalizados, até 60 caracteres
+const cleanModel=v=>typeof v==='string'
+  ?v.replace(/[\u0000-\u001F\u007F-\u009F\u200B-\u200F\u2028-\u202E\u2066-\u2069\uFEFF]/g,' ').replace(/\s+/g,' ').trim().slice(0,MAX_MODEL)
+  :'';
 let saved={};
-try{saved=JSON.parse(localStorage.getItem(KEY))||{};}catch(e){}
-const state=DATA.map((c,k)=>c.items.map((_,j)=>!!(saved.state&&saved.state[k]&&saved.state[k][j])));
-const CI=window.CI={cur:0,type:saved.type||'sedan',color:saved.color||'#2c449f',model:saved.model||'',plate:saved.plate||''};
+try{saved=JSON.parse(localStorage.getItem(KEY));}catch(e){}
+if(!saved||typeof saved!=='object'||Array.isArray(saved))saved={};
+const state=DATA.map((c,k)=>c.items.map((_,j)=>Array.isArray(saved.state)&&Array.isArray(saved.state[k])&&saved.state[k][j]===true));
+const CI=window.CI={
+  cur:0,
+  type:TYPES.includes(saved.type)?saved.type:'sedan',
+  color:COLORS.includes(saved.color)?saved.color:'#2c449f',
+  model:cleanModel(saved.model),
+  plate:typeof saved.plate==='string'&&PLATE_RE.test(saved.plate)?saved.plate:''
+};
 function save(){
   try{localStorage.setItem(KEY,JSON.stringify({state,type:CI.type,color:CI.color,model:CI.model,plate:CI.plate}));}catch(e){}
 }
@@ -124,7 +141,8 @@ function update(){
   renderSummary();
 }
 function select(k,scroll){
-  if(k<0||k>=DATA.length)return;
+  k=Number(k);
+  if(!Number.isInteger(k)||k<0||k>=DATA.length)return;
   CI.cur=k;renderTabs();renderList();
   if(window.Car3D)Car3D.focus(k);
   if(scroll)$('checklist').scrollIntoView({behavior:'smooth',block:'start'});
@@ -164,12 +182,14 @@ $('hotspots').addEventListener('click',e=>{
 
 // Tipo de carroceria e cor do modelo 3D
 function setType(t){
+  if(!TYPES.includes(t))t='sedan';
   CI.type=t;
   document.querySelectorAll('#types button').forEach(b=>b.setAttribute('aria-checked',b.dataset.type===t));
   if(window.Car3D)Car3D.setType(t);
   save();
 }
 function setColor(c){
+  if(!COLORS.includes(c))c='#2c449f';
   CI.color=c;
   document.querySelectorAll('#colors button').forEach(b=>b.setAttribute('aria-checked',b.dataset.color===c));
   if(window.Car3D)Car3D.setColor(c);
@@ -192,6 +212,8 @@ function showSug(){
 }
 function hideSug(){sug.hidden=true;q.setAttribute('aria-expanded',false);}
 function pickCar(name,type){
+  name=cleanModel(name);
+  if(!name)return;
   CI.model=name;q.value=name;
   if(type)setType(type);
   save();renderSummary();hideSug();
@@ -219,13 +241,14 @@ q.addEventListener('keydown',e=>{
   if(e.key==='Enter'){
     e.preventDefault();
     if(act>=0&&lis[act]){const c=CARS[+lis[act].dataset.i];pickCar(c[0],c[2]);}
-    else if(q.value.trim()){
+    else if(cleanModel(q.value)){
       // Texto livre: tenta reconhecer um modelo conhecido no que foi digitado
-      const t=q.value.trim(),c=CARS.find(c=>t.toLowerCase().includes(c[0].toLowerCase().split(' ').pop()));
+      const t=cleanModel(q.value),c=CARS.find(c=>t.toLowerCase().includes(c[0].toLowerCase().split(' ').pop()));
       pickCar(t,c&&c[2]);
     }
   }
 });
+q.maxLength=MAX_MODEL;
 if(CI.model)q.value=CI.model;
 
 // Placa: formato Mercosul (ABC1D23) ou antigo (ABC-1234)
@@ -256,7 +279,7 @@ if(CI.plate)plate.value=fmtPlate(CI.plate);
 
 // Relatório em PDF: documento próprio para impressão, com parecer, resumo e detalhes
 const TYPE_NAME={hatch:'Hatch',sedan:'Sedã',suv:'SUV',picape:'Picape'};
-const esc=s=>String(s).replace(/[&<>"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
+const esc=s=>String(s).replace(/[&<>"'`]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','`':'&#96;'}[ch]));
 const RP_ICON={
   ok:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg>',
   pend:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="12" r="7"/></svg>',
@@ -272,13 +295,18 @@ function reportStats(){
 function buildPrint(){
   const st=reportStats(),now=new Date();
   const date=now.toLocaleDateString('pt-BR'),time=now.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
-  const id='CI-'+now.toISOString().slice(0,10).replace(/-/g,'')+'-'+(CI.plate||'0000').slice(-4).toUpperCase();
+  const plateTxt=PLATE_RE.test(CI.plate)?CI.plate:'';
+  const id=esc('CI-'+now.toISOString().slice(0,10).replace(/-/g,'')+'-'+(plateTxt||'0000').slice(-4).toUpperCase());
   const critPend=st.c.n-st.c.ok;
   const v=st.done===st.items.length?{cls:'ok',t:'Checagem concluída',d:`Todos os ${st.items.length} pontos foram verificados. Guarde este relatório junto com os documentos do veículo.`}
     :critPend?{cls:'bad',t:`Atenção: ${critPend} ${critPend>1?'itens críticos pendentes':'item crítico pendente'}`,d:'Não feche negócio antes de conferir os itens críticos listados em "Pendências prioritárias". Eles envolvem procedência, documentação e segurança.'}
     :{cls:'warn',t:'Checagem parcial',d:`Todos os itens críticos foram verificados, mas ainda ${st.items.length-st.done>1?'restam':'resta'} ${st.items.length-st.done} ${st.items.length-st.done>1?'pontos':'ponto'} a conferir antes da compra.`};
-  const colorName=(document.querySelector(`#colors [data-color="${CI.color}"]`)||{}).ariaLabel||'—';
+  // Sem montar seletor CSS com dado do usuário: compara a cor com cada botão
+  const colorBtn=[...document.querySelectorAll('#colors button')].find(b=>b.dataset.color===CI.color);
+  const colorName=(colorBtn&&colorBtn.getAttribute('aria-label'))||'—';
   let shot='';try{shot=window.Car3D&&Car3D.snapshot?Car3D.snapshot():'';}catch(e){}
+  // A imagem só entra no relatório se for mesmo um data URL de imagem
+  if(!/^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/.test(shot))shot='';
   const R=46,C=2*Math.PI*R;
   const pending=st.items.filter(x=>!x.ok&&x.lv!=='r').sort((a,b)=>(a.lv==='c'?0:1)-(b.lv==='c'?0:1));
   const chip=lv=>`<span class="rp-lv rp-lv-${lv}">${LEVEL[lv]}</span>`;
@@ -296,9 +324,9 @@ function buildPrint(){
     <div class="rp-veh">
      <span class="rp-kicker">Veículo inspecionado</span>
      <h1>${esc(CI.model||'Modelo não informado')}</h1>
-     <div class="rp-plate"><span class="rp-plate-top">BRASIL</span><span class="rp-plate-n">${CI.plate?fmtPlate(CI.plate):'SEM PLACA'}</span></div>
+     <div class="rp-plate"><span class="rp-plate-top">BRASIL</span><span class="rp-plate-n">${plateTxt?esc(fmtPlate(plateTxt)):'SEM PLACA'}</span></div>
      <dl class="rp-specs">
-      <div><dt>Carroceria</dt><dd>${TYPE_NAME[CI.type]||'—'}</dd></div>
+      <div><dt>Carroceria</dt><dd>${esc(TYPES.includes(CI.type)?TYPE_NAME[CI.type]:'—')}</dd></div>
       <div><dt>Cor</dt><dd>${esc(colorName)}</dd></div>
       <div><dt>Data da checagem</dt><dd>${date}</dd></div>
       <div><dt>Pontos verificados</dt><dd>${st.done} de ${st.items.length}</dd></div>
@@ -354,7 +382,7 @@ function buildPrint(){
     </div>
     <p class="rp-legal">Este relatório registra a checagem feita pelo próprio comprador com o roteiro do ClearInspect. Ele é um guia de verificação e não substitui o laudo de vistoria cautelar, a consulta aos órgãos oficiais (Detran, Senatran) nem a avaliação de um mecânico de confiança.</p>
    </section>
-   <footer class="rp-foot"><span>ClearInspect · ${id}</span><span>${esc(CI.model||'Veículo')} ${CI.plate?'· '+fmtPlate(CI.plate):''}</span></footer>
+   <footer class="rp-foot"><span>ClearInspect · ${id}</span><span>${esc(CI.model||'Veículo')} ${plateTxt?'· '+esc(fmtPlate(plateTxt)):''}</span></footer>
   </div>`;
 }
 window.addEventListener('beforeprint',buildPrint);
