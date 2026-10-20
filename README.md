@@ -12,7 +12,7 @@ Site de checagem de carro usado: um checklist guiado com 35 pontos (anúncio, la
 - `models/`: modelos 3D (hatch, sedã, SUV e picape) em glTF comprimido, embutidos em arquivos `.js` para o site funcionar abrindo o `index.html` direto do computador.
 
 ### Relatório em PDF
-Clique em "Relatório PDF" e escolha "Salvar como PDF". O relatório traz identificação do veículo com foto do modelo 3D, parecer geral, resumo por etapa, pendências prioritárias, checklist completo com orientações e campos para observações e assinaturas.
+Clique em "Relatório PDF" e escolha "Salvar como PDF". O relatório traz identificação do veículo com foto do modelo 3D, resumo por etapa, pendências prioritárias, checklist completo com orientações e campos para observações e assinaturas.
 
 ### Como abrir
 Basta abrir o `index.html` no navegador (precisa de internet para carregar o Three.js e as fontes).
